@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact — DripCheck</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black: #050403; --brass: #b8860b; --brass-light: #D4A84B;
+      --brass-dim: rgba(184,134,11,0.25); --brass-border: rgba(184,134,11,0.3);
+      --text: rgba(255,255,255,0.72); --text-bright: rgba(255,255,255,0.92);
+      --text-dim: rgba(255,255,255,0.4); --card-bg: rgba(14,11,7,0.95);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background-color: var(--black); color: var(--text);
+      font-family: 'Barlow', sans-serif; font-size: 16px; line-height: 1.6; overflow-x: hidden;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 9999; opacity: 0.4;
+    }
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      display: flex; align-items: center; justify-content: space-between; padding: 20px 48px;
+      background: rgba(5,4,3,0.97); border-bottom: 1px solid var(--brass-border); backdrop-filter: blur(12px);
+    }
+    .nav-logo {
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 22px;
+      letter-spacing: 4px; text-transform: uppercase; color: var(--brass-light); text-decoration: none;
+    }
+    .nav-links { display: flex; gap: 36px; list-style: none; }
+    .nav-links a {
+      font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim); text-decoration: none; transition: color 0.3s;
+    }
+    .nav-links a:hover { color: var(--brass-light); }
+    .nav-cta {
+      font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--black); background: linear-gradient(135deg, var(--brass), var(--brass-light));
+      border: none; padding: 10px 24px; border-radius: 6px; cursor: pointer;
+      transition: opacity 0.3s, transform 0.2s; text-decoration: none; display: inline-block;
+    }
+    .nav-cta:hover { opacity: 0.85; transform: translateY(-1px); }
+
+    /* PAGE HEADER */
+    .page-header {
+      padding: 160px 48px 80px; text-align: center; position: relative;
+      border-bottom: 1px solid var(--brass-border);
+    }
+    .page-header::after {
+      content: ''; position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%);
+      width: 120px; height: 2px;
+      background: linear-gradient(to right, transparent, var(--brass-light), transparent);
+    }
+    .page-eyebrow {
+      display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 4px;
+      text-transform: uppercase; color: var(--brass); border: 1px solid var(--brass-border);
+      padding: 6px 18px; border-radius: 100px; margin-bottom: 24px; background: rgba(184,134,11,0.07);
+    }
+    .page-title {
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
+      font-size: clamp(40px, 7vw, 80px); letter-spacing: 4px; text-transform: uppercase;
+      color: var(--text-bright); line-height: 1; margin-bottom: 16px;
+    }
+    .page-title span {
+      background: linear-gradient(135deg, var(--brass), var(--brass-light));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .page-sub { font-size: 16px; color: var(--text-dim); max-width: 480px; margin: 0 auto; line-height: 1.7; }
+
+    /* CONTENT */
+    .content-wrap { max-width: 960px; margin: 0 auto; padding: 80px 48px 120px; }
+
+    /* CONTACT CARDS */
+    .contact-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-bottom: 80px;
+    }
+    .contact-card {
+      background: var(--card-bg); border: 1px solid var(--brass-border);
+      padding: 48px 36px; position: relative; overflow: hidden;
+      transition: border-color 0.3s;
+      opacity: 0; transform: translateY(20px);
+      animation: fadeUp 0.6s ease forwards;
+    }
+    .contact-card:nth-child(1) { animation-delay: 0.1s; border-radius: 16px 0 0 16px; }
+    .contact-card:nth-child(2) { animation-delay: 0.2s; }
+    .contact-card:nth-child(3) { animation-delay: 0.3s; border-radius: 0 16px 16px 0; }
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .contact-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(to right, transparent, var(--brass), transparent);
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .contact-card:hover { border-color: rgba(184,134,11,0.6); }
+    .contact-card:hover::before { opacity: 1; }
+    .card-icon { font-size: 28px; margin-bottom: 20px; }
+    .card-type {
+      font-size: 10px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase;
+      color: var(--brass); margin-bottom: 10px; display: block;
+    }
+    .card-title {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 900;
+      letter-spacing: 2px; text-transform: uppercase; color: var(--text-bright); margin-bottom: 14px;
+    }
+    .card-desc { font-size: 14px; color: var(--text); line-height: 1.7; margin-bottom: 24px; }
+    .card-email {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 600; color: var(--brass-light);
+      text-decoration: none; letter-spacing: 0.5px;
+      border-bottom: 1px solid rgba(184,134,11,0.3); padding-bottom: 2px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .card-email:hover { color: #fff; border-color: rgba(255,255,255,0.4); }
+    .card-response {
+      font-size: 11px; color: var(--text-dim); letter-spacing: 1.5px;
+      text-transform: uppercase; margin-top: 12px; display: block;
+    }
+
+    /* QUICK INFO BAR */
+    .info-bar {
+      background: var(--card-bg); border: 1px solid var(--brass-border); border-radius: 12px;
+      padding: 28px 36px; display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 24px; margin-bottom: 80px;
+      opacity: 0; transform: translateY(20px);
+      animation: fadeUp 0.6s ease 0.4s forwards;
+    }
+    .info-item { display: flex; flex-direction: column; gap: 6px; }
+    .info-label { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim); }
+    .info-value { font-size: 14px; color: var(--text-bright); font-weight: 500; }
+
+    /* FAQ */
+    .faq-heading {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 32px; font-weight: 900;
+      letter-spacing: 3px; text-transform: uppercase; color: var(--text-bright);
+      margin-bottom: 32px; text-align: center;
+      opacity: 0; transform: translateY(20px);
+      animation: fadeUp 0.6s ease 0.5s forwards;
+    }
+    .faq-list { display: flex; flex-direction: column; gap: 2px; }
+    .faq-item {
+      background: var(--card-bg); border: 1px solid var(--brass-border);
+      overflow: hidden; transition: border-color 0.2s;
+      opacity: 0; transform: translateY(16px);
+      animation: fadeUp 0.5s ease forwards;
+    }
+    .faq-item:nth-child(1) { animation-delay: 0.6s; border-radius: 10px 10px 0 0; }
+    .faq-item:nth-child(2) { animation-delay: 0.65s; }
+    .faq-item:nth-child(3) { animation-delay: 0.7s; }
+    .faq-item:nth-child(4) { animation-delay: 0.75s; border-radius: 0 0 10px 10px; }
+    .faq-item:hover { border-color: rgba(184,134,11,0.55); }
+    .faq-q {
+      padding: 22px 28px; cursor: pointer;
+      font-size: 15px; font-weight: 600; color: var(--text-bright);
+      display: flex; justify-content: space-between; align-items: center; gap: 16px;
+      user-select: none;
+    }
+    .faq-q .arrow { color: var(--brass); font-size: 18px; transition: transform 0.3s; flex-shrink: 0; }
+    .faq-item.open .faq-q .arrow { transform: rotate(45deg); }
+    .faq-a {
+      max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.3s;
+      padding: 0 28px; font-size: 14px; color: var(--text); line-height: 1.8;
+    }
+    .faq-item.open .faq-a { max-height: 200px; padding: 0 28px 22px; }
+    .faq-a a { color: var(--brass-light); text-decoration: none; border-bottom: 1px solid rgba(184,134,11,0.3); }
+
+    /* FOOTER */
+    .brass-divider { height: 1px; background: linear-gradient(to right, transparent, var(--brass-border), transparent); }
+    footer {
+      border-top: 1px solid var(--brass-border); padding: 40px 48px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;
+    }
+    .footer-logo { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 18px; letter-spacing: 4px; text-transform: uppercase; color: var(--brass); }
+    .footer-copy { font-size: 12px; color: var(--text-dim); letter-spacing: 1px; }
+    .footer-links { display: flex; gap: 24px; list-style: none; }
+    .footer-links a { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); text-decoration: none; transition: color 0.3s; }
+    .footer-links a:hover { color: var(--brass-light); }
+
+    @media (max-width: 768px) {
+      nav { padding: 16px 20px; } .nav-links { display: none; }
+      .page-header { padding: 120px 24px 60px; } .content-wrap { padding: 48px 24px 80px; }
+      .contact-grid { grid-template-columns: 1fr; }
+      .contact-card:nth-child(1) { border-radius: 16px 16px 0 0; }
+      .contact-card:nth-child(3) { border-radius: 0 0 16px 16px; }
+      .info-bar { flex-direction: column; gap: 16px; }
+      footer { flex-direction: column; gap: 20px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="nav-logo"><img src="logo-full.png" alt="DripCheck" style="height:36px;width:36px;object-fit:contain;vertical-align:middle;margin-right:10px;">DripCheck</a>
+    <ul class="nav-links">
+      <li><a href="index.html#about">The Vault</a></li>
+      <li><a href="index.html#features">Features</a></li>
+      <li><a href="index.html#download">Download</a></li>
+    </ul>
+    <a href="index.html#download" class="nav-cta">Get the App</a>
+  </nav>
+
+  <div class="page-header">
+    <div class="page-eyebrow">Get in Touch</div>
+    <h1 class="page-title">Contact <span>Us</span></h1>
+    <p class="page-sub">We're here to help. Pick the right channel and we'll get back to you fast.</p>
+  </div>
+
+  <div class="content-wrap">
+
+    <!-- 3 CONTACT CARDS -->
+    <div class="contact-grid">
+      <div class="contact-card">
+        <div class="card-icon">🛠️</div>
+        <span class="card-type">Support</span>
+        <h3 class="card-title">Technical Help</h3>
+        <p class="card-desc">Bugs, crashes, account issues, or anything not working as expected.</p>
+        <a href="mailto:support@trydripcheck.com" class="card-email">support@trydripcheck.com</a>
+        <span class="card-response">Response: 24–48 hours</span>
+      </div>
+      <div class="contact-card">
+        <div class="card-icon">🔒</div>
+        <span class="card-type">Privacy</span>
+        <h3 class="card-title">Data Requests</h3>
+        <p class="card-desc">GDPR, CCPA, data deletion, account removal, and privacy concerns.</p>
+        <a href="mailto:privacy@trydripcheck.com" class="card-email">privacy@trydripcheck.com</a>
+        <span class="card-response">Response: Within 30 days</span>
+      </div>
+      <div class="contact-card">
+        <div class="card-icon">✉️</div>
+        <span class="card-type">General</span>
+        <h3 class="card-title">Everything Else</h3>
+        <p class="card-desc">Partnerships, feedback, press inquiries, or just want to say hello.</p>
+        <a href="mailto:contact@trydripcheck.com" class="card-email">contact@trydripcheck.com</a>
+        <span class="card-response">Response: 2–3 business days</span>
+      </div>
+    </div>
+
+    <!-- INFO BAR -->
+    <div class="info-bar">
+      <div class="info-item">
+        <span class="info-label">Support Hours</span>
+        <span class="info-value">Monday – Friday, Business Days</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Urgent Issues</span>
+        <span class="info-value">Add "URGENT" to subject line</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Account Deletion</span>
+        <span class="info-value">Subject: "Delete My Account"</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Website</span>
+        <span class="info-value">trydripcheck.com</span>
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    <h2 class="faq-heading">Quick <span style="background:linear-gradient(135deg,var(--brass),var(--brass-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Answers</span></h2>
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q">
+          How do I delete my account?
+          <span class="arrow">+</span>
+        </div>
+        <div class="faq-a">Go to Settings — Profile — Delete Account inside the app, or email <a href="mailto:support@trydripcheck.com">support@trydripcheck.com</a> with subject "Delete Account". All data is permanently removed within 30 days.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">
+          How do I request a copy of my data?
+          <span class="arrow">+</span>
+        </div>
+        <div class="faq-a">Email <a href="mailto:privacy@trydripcheck.com">privacy@trydripcheck.com</a> with the subject "Data Export Request". We'll process your request within 30 days in accordance with applicable privacy laws.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">
+          I found a bug. How do I report it?
+          <span class="arrow">+</span>
+        </div>
+        <div class="faq-a">Email <a href="mailto:support@trydripcheck.com">support@trydripcheck.com</a> with a description of the issue, your device model, OS version, and steps to reproduce it. We'll investigate and respond within 24–48 hours.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">
+          Where can I find the Privacy Policy and Terms of Service?
+          <span class="arrow">+</span>
+        </div>
+        <div class="faq-a">Both are available on this website: <a href="privacy.html">Privacy Policy</a> and <a href="terms.html">Terms of Service</a>. They're also linked in the app under Settings.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="brass-divider"></div>
+  <footer>
+    <span class="footer-logo" style="display:flex;align-items:center;gap:10px;"><img src="logo-full.png" alt="DripCheck" style="height:32px;width:32px;object-fit:contain;">DripCheck</span>
+    <span class="footer-copy">© 2025 DripCheck. All rights reserved.</span>
+    <ul class="footer-links">
+      <li><a href="privacy.html">Privacy</a></li>
+      <li><a href="terms.html">Terms</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+  </footer>
+
+  <script>
+    document.querySelectorAll('.faq-item').forEach(function(item) {
+      item.querySelector('.faq-q').addEventListener('click', function() {
+        var isOpen = item.classList.contains('open');
+        document.querySelectorAll('.faq-item').forEach(function(i) { i.classList.remove('open'); });
+        if (!isOpen) item.classList.add('open');
+      });
+    });
+  </script>
+</body>
+</html>

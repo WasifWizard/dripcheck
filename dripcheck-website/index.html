@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DripCheck — The Vault</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.halo.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #050403;
+      --brass: #b8860b;
+      --brass-light: #D4A84B;
+      --brass-dim: rgba(184,134,11,0.25);
+      --brass-border: rgba(184,134,11,0.3);
+      --text: rgba(255,255,255,0.72);
+      --text-bright: rgba(255,255,255,0.92);
+      --text-dim: rgba(255,255,255,0.4);
+      --green: #4CAF50;
+      --card-bg: rgba(14,11,7,0.95);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--black);
+      color: var(--text);
+      font-family: 'Barlow', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.4;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 48px;
+      background: linear-gradient(to bottom, rgba(5,4,3,0.95), transparent);
+      backdrop-filter: blur(2px);
+      transition: all 0.3s;
+    }
+    .nav-logo {
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 22px;
+      letter-spacing: 4px; text-transform: uppercase; color: var(--brass-light); text-decoration: none;
+    }
+    .nav-links { display: flex; gap: 36px; list-style: none; }
+    .nav-links a {
+      font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim); text-decoration: none; transition: color 0.3s;
+    }
+    .nav-links a:hover { color: var(--brass-light); }
+    .nav-cta {
+      font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--black); background: linear-gradient(135deg, var(--brass), var(--brass-light));
+      border: none; padding: 10px 24px; border-radius: 6px; cursor: pointer;
+      transition: opacity 0.3s, transform 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.85; transform: translateY(-1px); }
+
+    /* HERO */
+    .hero {
+      position: relative; min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 120px 24px 80px; overflow: hidden;
+      width: 100vw; margin-left: calc(-50vw + 50%);
+    }
+    #vanta-hero {
+      position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0;
+    }
+    /* Darken the vanta scene so text stays legible */
+    .hero-overlay {
+      position: absolute; inset: 0; z-index: 1;
+      background: radial-gradient(ellipse at center, rgba(5,4,3,0.3) 0%, rgba(5,4,3,0.65) 100%);
+    }
+    .hero-content { position: relative; z-index: 2; }
+
+    .hero-eyebrow {
+      display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 4px;
+      text-transform: uppercase; color: var(--brass); border: 1px solid var(--brass-border);
+      padding: 6px 18px; border-radius: 100px; margin-bottom: 28px; background: rgba(184,134,11,0.07);
+    }
+    .hero-title {
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
+      font-size: clamp(64px, 12vw, 140px); line-height: 0.9;
+      letter-spacing: 6px; text-transform: uppercase; margin-bottom: 12px;
+    }
+    .hero-title span {
+      background: linear-gradient(135deg, var(--brass), var(--brass-light), var(--brass));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero-tagline {
+      font-family: 'Playfair Display', serif; font-size: clamp(16px, 2.5vw, 22px);
+      font-style: italic; color: var(--text-dim); margin-bottom: 32px; letter-spacing: 1px;
+    }
+    .hero-desc {
+      max-width: 520px; margin: 0 auto 52px; font-size: 16px; color: var(--text); line-height: 1.8;
+    }
+    .hero-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase; color: var(--black);
+      background: linear-gradient(135deg, var(--brass), var(--brass-light));
+      border: none; padding: 18px 36px; border-radius: 8px; cursor: pointer;
+      text-decoration: none; transition: all 0.3s; height: 56px;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(184,134,11,0.35); }
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase; color: var(--text-bright);
+      background: transparent; border: 1px solid var(--brass-border);
+      padding: 18px 36px; border-radius: 8px; cursor: pointer; text-decoration: none;
+      transition: all 0.3s; height: 56px;
+    }
+    .btn-secondary:hover { border-color: var(--brass); background: rgba(184,134,11,0.06); transform: translateY(-2px); }
+
+    .hero-scroll {
+      position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      color: var(--text-dim); font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+      animation: bounce 2s infinite; z-index: 2;
+    }
+    .scroll-line { width: 1px; height: 40px; background: linear-gradient(to bottom, var(--brass), transparent); }
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(6px); }
+    }
+
+    /* DIVIDER & FULL WIDTH */
+    .brass-divider {
+      width: 100%; height: 1px;
+      background: linear-gradient(to right, transparent, var(--brass-border), var(--brass), var(--brass-border), transparent);
+    }
+    .full-width { width: 100vw; margin-left: calc(-50vw + 50%); }
+
+    /* SECTIONS */
+    section { position: relative; padding: 100px 48px; max-width: 1200px; margin: 0 auto; }
+    .section-eyebrow {
+      font-size: 11px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase;
+      color: var(--brass); margin-bottom: 16px;
+    }
+    .section-title {
+      font-family: 'Barlow Condensed', sans-serif; font-size: clamp(36px, 5vw, 64px);
+      font-weight: 900; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--text-bright); line-height: 1; margin-bottom: 20px;
+    }
+    .section-sub {
+      font-size: 16px; color: var(--text); max-width: 540px; line-height: 1.8; margin-bottom: 64px;
+    }
+
+    /* WHAT GRID */
+    .what-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 60px; }
+    .what-card {
+      background: var(--card-bg); border: 1px solid var(--brass-border);
+      padding: 48px 40px; position: relative; overflow: hidden; transition: border-color 0.3s;
+    }
+    .what-card:hover { border-color: rgba(184,134,11,0.6); }
+    .what-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(to right, transparent, var(--brass), transparent);
+      opacity: 0; transition: opacity 0.3s;
+    }
+    .what-card:hover::before { opacity: 1; }
+    .what-card:first-child  { border-radius: 16px 0 0 0; }
+    .what-card:nth-child(2) { border-radius: 0 16px 0 0; }
+    .what-card:nth-child(3) { border-radius: 0 0 0 16px; }
+    .what-card:last-child   { border-radius: 0 0 16px 0; }
+    .what-icon { font-size: 32px; margin-bottom: 20px; }
+    .what-card h3 {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 900;
+      letter-spacing: 2px; text-transform: uppercase; color: var(--text-bright); margin-bottom: 12px;
+    }
+    .what-card p { font-size: 14px; color: var(--text); line-height: 1.8; }
+
+    /* SCORE */
+    .score-showcase { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+    .score-circle {
+      width: 160px; height: 160px; border-radius: 50%; flex-shrink: 0;
+      background: conic-gradient(var(--brass) 0deg, var(--brass-light) 280deg, rgba(184,134,11,0.15) 280deg);
+      display: flex; align-items: center; justify-content: center;
+      position: relative; box-shadow: 0 0 60px rgba(184,134,11,0.2);
+    }
+    .score-circle::before { content: ''; position: absolute; inset: 8px; background: var(--black); border-radius: 50%; }
+    .score-num {
+      position: relative; z-index: 1; font-family: 'Barlow Condensed', sans-serif;
+      font-size: 56px; font-weight: 900; color: var(--brass-light);
+    }
+    .score-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    .score-tag {
+      font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 5px 12px; border-radius: 100px; border: 1px solid var(--brass-border);
+      background: rgba(184,134,11,0.06); color: var(--brass-light);
+    }
+    .score-tag.red { border-color: rgba(244,67,54,0.3); background: rgba(244,67,54,0.06); color: #F44336; }
+    .score-verdict {
+      flex: 1; min-width: 280px; background: var(--card-bg);
+      border: 1px solid var(--brass-border); border-radius: 16px; padding: 36px;
+      position: relative; overflow: hidden;
+    }
+    .score-verdict::after {
+      content: '"'; position: absolute; top: -10px; right: 20px;
+      font-family: 'Playfair Display', serif; font-size: 120px; color: var(--brass-dim); line-height: 1;
+    }
+    .score-verdict p {
+      font-family: 'Playfair Display', serif; font-size: 18px; font-style: italic;
+      color: var(--text); line-height: 1.8; position: relative; z-index: 1;
+    }
+    .verdict-label {
+      font-family: 'Barlow', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--brass); font-style: normal; margin-bottom: 16px; display: block;
+    }
+
+    /* FEATURES */
+    .features-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+      background: var(--brass-border); border: 1px solid var(--brass-border);
+      border-radius: 16px; overflow: hidden; margin-top: 12px;
+    }
+    .feature-item { background: var(--card-bg); padding: 48px 36px; transition: background 0.3s; }
+    .feature-item:hover { background: rgba(184,134,11,0.04); }
+    .feature-num {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700;
+      letter-spacing: 3px; color: var(--brass); margin-bottom: 28px; display: block;
+    }
+    .feature-item h3 {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 900;
+      letter-spacing: 2px; text-transform: uppercase; color: var(--text-bright); margin-bottom: 14px; line-height: 1.1;
+    }
+    .feature-item p { font-size: 14px; color: var(--text); line-height: 1.8; }
+
+    /* MANIFESTO */
+    .manifesto-wrap {
+      width: 100vw; margin-left: calc(-50vw + 50%);
+      background: rgba(184,134,11,0.03); border-top: 1px solid var(--brass-border); border-bottom: 1px solid var(--brass-border);
+    }
+    .manifesto-inner { text-align: center; padding: 120px 48px; max-width: 1200px; margin: 0 auto; }
+    .manifesto-quote {
+      font-family: 'Playfair Display', serif; font-size: clamp(22px, 3.5vw, 40px);
+      font-style: italic; color: var(--text); max-width: 800px; margin: 0 auto 40px; line-height: 1.6;
+    }
+    .manifesto-quote em { color: var(--brass-light); font-style: normal; }
+    .manifesto-pills { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 40px; }
+    .pill {
+      font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+      padding: 8px 20px; border-radius: 100px; border: 1px solid var(--brass-border);
+      color: var(--text-dim); background: rgba(184,134,11,0.04);
+    }
+
+    /* DOWNLOAD */
+    .download-cards { display: flex; gap: 20px; justify-content: center; margin-top: 52px; flex-wrap: wrap; }
+    .app-card {
+      background: var(--card-bg); border: 1px solid var(--brass-border); border-radius: 16px;
+      padding: 40px 48px; display: flex; flex-direction: column; align-items: center; gap: 16px;
+      text-decoration: none; transition: all 0.3s; min-width: 240px; position: relative; overflow: hidden;
+    }
+    .app-card::before {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(to right, transparent, var(--brass), transparent);
+      transform: scaleX(0); transition: transform 0.4s;
+    }
+    .app-card:hover { border-color: rgba(184,134,11,0.55); transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+    .app-card:hover::before { transform: scaleX(1); }
+    .app-icon {
+      width: 64px; height: 64px; border-radius: 16px;
+      background: linear-gradient(135deg, var(--brass), var(--brass-light));
+      display: flex; align-items: center; justify-content: center; font-size: 28px;
+    }
+    .app-platform { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim); }
+    .app-name {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 900;
+      letter-spacing: 2px; text-transform: uppercase; color: var(--text-bright);
+    }
+    .app-badge {
+      font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--brass); background: rgba(184,134,11,0.1); border: 1px solid var(--brass-border);
+      padding: 4px 14px; border-radius: 100px;
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--brass-border); padding: 40px 48px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;
+    }
+    .footer-logo {
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 18px;
+      letter-spacing: 4px; text-transform: uppercase; color: var(--brass);
+    }
+    .footer-copy { font-size: 12px; color: var(--text-dim); letter-spacing: 1px; }
+    .footer-links { display: flex; gap: 24px; list-style: none; }
+    .footer-links a {
+      font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim); text-decoration: none; transition: color 0.3s;
+    }
+    .footer-links a:hover { color: var(--brass-light); }
+
+    /* ANIMATIONS */
+    .fade-up { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      nav { padding: 16px 20px; }
+      .nav-links { display: none; }
+      section { padding: 72px 20px; }
+      .what-grid { grid-template-columns: 1fr; }
+      .what-card { border-radius: 0 !important; }
+      .what-card:first-child { border-radius: 16px 16px 0 0 !important; }
+      .what-card:last-child  { border-radius: 0 0 16px 16px !important; }
+      .features-grid { grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: 20px; text-align: center; }
+      .manifesto-inner { padding: 80px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo"><img src="logo-full.png" alt="DripCheck" style="height:36px;width:36px;object-fit:contain;vertical-align:middle;margin-right:10px;">DripCheck</a>
+    <ul class="nav-links">
+      <li><a href="#about">The Vault</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#download">Download</a></li>
+    </ul>
+    <button class="nav-cta" onclick="document.getElementById('download').scrollIntoView({behavior:'smooth'})">Get the App</button>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div id="vanta-hero"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-eyebrow">Est. 2025 — The Standard for Style</div>
+      <h1 class="hero-title"><span>DRIP</span><br><span>CHECK</span></h1>
+      <p class="hero-tagline">Not everyone gets in. Neither does every fit.</p>
+      <p class="hero-desc">The AI that doesn't flatter you. DripCheck scores your outfit with brutal honesty, sharp precision, and the eye of a luxury stylist who owes you nothing.</p>
+      <div class="hero-actions">
+        <a href="#download" class="btn-primary">Download Free</a>
+        <a href="#about" class="btn-secondary">Learn More</a>
+      </div>
+    </div>
+    <div class="hero-scroll"><div class="scroll-line"></div>Scroll</div>
+  </div>
+
+  <div class="full-width"><div class="brass-divider"></div></div>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="section-eyebrow fade-up">The Vault</div>
+    <h2 class="section-title fade-up">What Is<br>DripCheck?</h2>
+    <p class="section-sub fade-up">DripCheck is your AI style judge — a mobile app that analyzes your outfit photo and delivers a raw, unfiltered score from 0–10, with detailed feedback on fit, color theory, occasion appropriateness, and the specific pieces dragging you down.</p>
+    <div class="what-grid">
+      <div class="what-card fade-up">
+        <div class="what-icon">👁️</div>
+        <h3>AI Vision Analysis</h3>
+        <p>Our model reads fabric drape, silhouette, color harmony, and occasion fit — not just aesthetics. It sees your outfit the way a trained eye does.</p>
+      </div>
+      <div class="what-card fade-up" style="transition-delay:0.1s">
+        <div class="what-icon">🔥</div>
+        <h3>The Roast Engine</h3>
+        <p>No participation trophies. DripCheck tells you what's working, what's dragging, and why that belt is sabotaging your whole look.</p>
+      </div>
+      <div class="what-card fade-up" style="transition-delay:0.2s">
+        <div class="what-icon">📐</div>
+        <h3>The Score Circle</h3>
+        <p>A precision 0–10 score visualized in brass. Green for bangers. Red for disasters. No ambiguity about where you stand.</p>
+      </div>
+      <div class="what-card fade-up" style="transition-delay:0.3s">
+        <div class="what-icon">🎯</div>
+        <h3>Mood Intelligence</h3>
+        <p>Tag your context — date night, boardroom, grailed pickup — and get feedback tuned to what the situation actually demands.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCORE PREVIEW -->
+  <section>
+    <div class="section-eyebrow fade-up">Live Example</div>
+    <h2 class="section-title fade-up">The Verdict<br>Looks Like This</h2>
+    <p class="section-sub fade-up">Real feedback. No sugarcoating. Your outfit gets judged the moment it walks in.</p>
+    <div class="score-showcase fade-up">
+      <div>
+        <div class="score-circle"><span class="score-num">7.8</span></div>
+        <div class="score-tags" style="max-width:200px; margin-top:20px;">
+          <span class="score-tag">Fit ✓</span>
+          <span class="score-tag">Color ✓</span>
+          <span class="score-tag red">Shoes ✗</span>
+          <span class="score-tag red">Belt ✗</span>
+        </div>
+      </div>
+      <div class="score-verdict">
+        <span class="verdict-label">AI Verdict — Business Casual</span>
+        <p>"The jacket cuts clean and your trousers sit correctly — that's the foundation. But those chunky sneakers are doing a 360 from every signal the top half is sending. The brown canvas belt is fighting with your black lapels. Swap for a slim Oxford and a black leather belt and this is a genuine 9.2."</p>
+        <div style="margin-top:28px; display:flex; gap:12px; flex-wrap:wrap;">
+          <span class="score-tag" style="color:var(--green); border-color:rgba(76,175,80,0.3); background:rgba(76,175,80,0.06)">Jacket — Banger</span>
+          <span class="score-tag red">Shoes — Red Flag</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="full-width"><div class="brass-divider"></div></div>
+
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="section-eyebrow fade-up">The Arsenal</div>
+    <h2 class="section-title fade-up">Built Different.<br>On Purpose.</h2>
+    <div class="features-grid fade-up">
+      <div class="feature-item">
+        <span class="feature-num">01</span>
+        <h3>Instant Outfit Score</h3>
+        <p>Snap or upload any outfit. Receive a precise 0–10 score with a full breakdown in under 10 seconds.</p>
+      </div>
+      <div class="feature-item">
+        <span class="feature-num">02</span>
+        <h3>The Roast Mode</h3>
+        <p>Ask for the raw truth. DripCheck will not hold back. Specific pieces get called out by name with no diplomatic filter.</p>
+      </div>
+      <div class="feature-item">
+        <span class="feature-num">03</span>
+        <h3>Occasion Matching</h3>
+        <p>Business Casual, Date Night, Grail Cop — tag the context and get feedback calibrated to actual real-world standards.</p>
+      </div>
+      <div class="feature-item">
+        <span class="feature-num">04</span>
+        <h3>Fit History Vault</h3>
+        <p>Every scored fit is saved to your personal vault. Track your style evolution and see what's working over time.</p>
+      </div>
+      <div class="feature-item">
+        <span class="feature-num">05</span>
+        <h3>Color Theory Engine</h3>
+        <p>Goes beyond "does it match." Reads harmony, contrast, saturation level, and seasonal palette fit.</p>
+      </div>
+      <div class="feature-item">
+        <span class="feature-num">06</span>
+        <h3>Mood Chips</h3>
+        <p>Frosted-glass tags that surface your outfit's detected mood — Understated, Loud, Professional, Streetwear-coded.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- MANIFESTO -->
+  <div class="manifesto-wrap">
+    <div class="manifesto-inner">
+      <div class="section-eyebrow fade-up">The Philosophy</div>
+      <p class="manifesto-quote fade-up">"Style is not <em>subjective</em>. There are principles. There are rules. There are people who know them and people who don't.<br><br>DripCheck is <em>the one that knows</em>."</p>
+      <div class="manifesto-pills fade-up">
+        <span class="pill">Exclusive</span>
+        <span class="pill">Honest</span>
+        <span class="pill">Sophisticated</span>
+        <span class="pill">Uncompromising</span>
+        <span class="pill">Masculine</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOWNLOAD -->
+  <section id="download" style="text-align:center;">
+    <div class="section-eyebrow fade-up" style="text-align:center">The Gates</div>
+    <h2 class="section-title fade-up" style="text-align:center">Step Inside<br>The Vault</h2>
+    <p class="section-sub fade-up" style="margin:0 auto; text-align:center;">Available on iOS and Android. Free to download. No excuses for a bad fit anymore.</p>
+    <div class="download-cards">
+      <a href="#" class="app-card fade-up">
+        <div class="app-icon"><img src="logo-full.png" alt="" style="width:36px;height:36px;object-fit:contain;"></div>
+        <span class="app-platform">Download on the</span>
+        <span class="app-name">App Store</span>
+        <span class="app-badge">iOS — Free</span>
+      </a>
+      <a href="#" class="app-card fade-up" style="transition-delay:0.1s;">
+        <div class="app-icon"><img src="logo-full.png" alt="" style="width:36px;height:36px;object-fit:contain;"></div>
+        <span class="app-platform">Get it on</span>
+        <span class="app-name">Google Play</span>
+        <span class="app-badge">Android — Free</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <div class="full-width"><div class="brass-divider"></div></div>
+  <footer>
+    <span class="footer-logo" style="display:flex;align-items:center;gap:10px;"><img src="logo-full.png" alt="DripCheck" style="height:32px;width:32px;object-fit:contain;">DripCheck</span>
+    <span class="footer-copy">© 2025 DripCheck. All rights reserved.</span>
+    <ul class="footer-links">
+      <li><a href="privacy.html">Privacy</a></li>
+      <li><a href="terms.html">Terms</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+  </footer>
+
+  <script>
+    // Init Vanta.js HALO effect — free, open source, zero watermark
+    VANTA.HALO({
+      el: '#vanta-hero',
+      mouseControls: true,
+      touchControls: true,
+      gyroControls: false,
+      minHeight: 200.0,
+      minWidth: 200.0,
+      baseColor: 0x0a0805,
+      backgroundColor: 0x050403,
+      amplitudeFactor: 2.0,
+      xOffset: 0.0,
+      yOffset: -0.1,
+      size: 1.8
+    });
+
+    // Scroll fade-up
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.fade-up').forEach(function(el) { observer.observe(el); });
+
+    // Nav scroll effect
+    var nav = document.querySelector('nav');
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 60) {
+        nav.style.background = 'rgba(5,4,3,0.97)';
+        nav.style.backdropFilter = 'blur(12px)';
+        nav.style.borderBottom = '1px solid rgba(184,134,11,0.15)';
+      } else {
+        nav.style.background = 'linear-gradient(to bottom, rgba(5,4,3,0.95), transparent)';
+        nav.style.backdropFilter = 'blur(2px)';
+        nav.style.borderBottom = 'none';
+      }
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — DripCheck</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black: #050403; --brass: #b8860b; --brass-light: #D4A84B;
+      --brass-dim: rgba(184,134,11,0.25); --brass-border: rgba(184,134,11,0.3);
+      --text: rgba(255,255,255,0.72); --text-bright: rgba(255,255,255,0.92);
+      --text-dim: rgba(255,255,255,0.4); --card-bg: rgba(14,11,7,0.95);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background-color: var(--black); color: var(--text);
+      font-family: 'Barlow', sans-serif; font-size: 16px; line-height: 1.6; overflow-x: hidden;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 9999; opacity: 0.4;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 48px;
+      background: rgba(5,4,3,0.97);
+      border-bottom: 1px solid var(--brass-border);
+      backdrop-filter: blur(12px);
+    }
+    .nav-logo {
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 22px;
+      letter-spacing: 4px; text-transform: uppercase; color: var(--brass-light); text-decoration: none;
+    }
+    .nav-links { display: flex; gap: 36px; list-style: none; }
+    .nav-links a {
+      font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim); text-decoration: none; transition: color 0.3s;
+    }
+    .nav-links a:hover { color: var(--brass-light); }
+    .nav-cta {
+      font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--black); background: linear-gradient(135deg, var(--brass), var(--brass-light));
+      border: none; padding: 10px 24px; border-radius: 6px; cursor: pointer;
+      transition: opacity 0.3s, transform 0.2s; text-decoration: none; display: inline-block;
+    }
+    .nav-cta:hover { opacity: 0.85; transform: translateY(-1px); }
+
+    /* PAGE HEADER */
+    .page-header {
+      padding: 160px 48px 80px;
+      text-align: center;
+      position: relative;
+      border-bottom: 1px solid var(--brass-border);
+    }
+    .page-header::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; left: 50%; transform: translateX(-50%);
+      width: 120px; height: 2px;
+      background: linear-gradient(to right, transparent, var(--brass-light), transparent);
+    }
+    .page-eyebrow {
+      display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 4px;
+      text-transform: uppercase; color: var(--brass); border: 1px solid var(--brass-border);
+      padding: 6px 18px; border-radius: 100px; margin-bottom: 24px; background: rgba(184,134,11,0.07);
+    }
+    .page-title {
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
+      font-size: clamp(40px, 7vw, 80px); letter-spacing: 4px; text-transform: uppercase;
+      color: var(--text-bright); line-height: 1; margin-bottom: 16px;
+    }
+    .page-title span {
+      background: linear-gradient(135deg, var(--brass), var(--brass-light));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .page-meta {
+      font-size: 13px; color: var(--text-dim); letter-spacing: 2px; text-transform: uppercase;
+    }
+
+    /* CONTENT */
+    .content-wrap {
+      max-width: 860px; margin: 0 auto; padding: 80px 48px 120px;
+    }
+
+    .policy-section {
+      margin-bottom: 64px;
+      opacity: 0; transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .policy-section.visible { opacity: 1; transform: translateY(0); }
+
+    .section-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase;
+      color: var(--brass); margin-bottom: 12px; display: block;
+    }
+    .section-heading {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 900;
+      letter-spacing: 2px; text-transform: uppercase; color: var(--text-bright);
+      margin-bottom: 20px; padding-bottom: 16px;
+      border-bottom: 1px solid rgba(184,134,11,0.15);
+    }
+    .policy-section p {
+      color: var(--text); font-size: 15px; line-height: 1.9; margin-bottom: 16px;
+    }
+    .policy-section p:last-child { margin-bottom: 0; }
+
+    /* LISTS */
+    .policy-list {
+      list-style: none; margin: 16px 0; display: flex; flex-direction: column; gap: 10px;
+    }
+    .policy-list li {
+      font-size: 15px; color: var(--text); line-height: 1.7;
+      padding-left: 20px; position: relative;
+    }
+    .policy-list li::before {
+      content: '—'; position: absolute; left: 0; color: var(--brass); font-weight: 700;
+    }
+
+    /* YES / NO BLOCKS */
+    .do-dont {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0;
+    }
+    .do-block, .dont-block {
+      background: var(--card-bg); border-radius: 12px; padding: 24px;
+    }
+    .do-block { border: 1px solid rgba(76,175,80,0.25); }
+    .dont-block { border: 1px solid rgba(244,67,54,0.2); }
+    .do-block .block-title { color: #4CAF50; font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 14px; }
+    .dont-block .block-title { color: #F44336; font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 14px; }
+    .do-block li::before { color: #4CAF50; content: '✓'; }
+    .dont-block li::before { color: #F44336; content: '✕'; }
+
+    /* INFO CARD */
+    .info-card {
+      background: var(--card-bg); border: 1px solid var(--brass-border);
+      border-radius: 12px; padding: 28px 32px; margin: 24px 0;
+      position: relative; overflow: hidden;
+    }
+    .info-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(to right, transparent, var(--brass), transparent);
+    }
+    .info-card p { margin-bottom: 0 !important; }
+
+    /* THIRD PARTY TABLE */
+    .services-grid {
+      display: flex; flex-direction: column; gap: 2px; margin: 20px 0;
+    }
+    .service-row {
+      background: var(--card-bg); border: 1px solid var(--brass-border);
+      padding: 18px 24px; display: flex; align-items: center; gap: 20px;
+      transition: border-color 0.2s;
+    }
+    .service-row:first-child { border-radius: 10px 10px 0 0; }
+    .service-row:last-child  { border-radius: 0 0 10px 10px; }
+    .service-row:hover { border-color: rgba(184,134,11,0.55); }
+    .service-name {
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 16px;
+      letter-spacing: 1px; text-transform: uppercase; color: var(--brass-light);
+      min-width: 160px; flex-shrink: 0;
+    }
+    .service-desc { font-size: 14px; color: var(--text); line-height: 1.6; }
+
+    /* CONTACT HIGHLIGHT */
+    .contact-highlight {
+      background: linear-gradient(135deg, rgba(184,134,11,0.08), rgba(184,134,11,0.04));
+      border: 1px solid var(--brass-border); border-radius: 12px; padding: 32px;
+      margin: 24px 0;
+    }
+    .contact-highlight a {
+      color: var(--brass-light); text-decoration: none; font-weight: 600;
+      border-bottom: 1px solid rgba(184,134,11,0.3); transition: border-color 0.2s;
+    }
+    .contact-highlight a:hover { border-color: var(--brass-light); }
+    .contact-row { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
+    .contact-row:last-child { margin-bottom: 0; }
+    .contact-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--text-dim); min-width: 80px; flex-shrink: 0;
+    }
+
+    /* DIVIDER */
+    .brass-divider {
+      height: 1px; margin: 48px 0;
+      background: linear-gradient(to right, transparent, var(--brass-border), transparent);
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--brass-border); padding: 40px 48px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;
+    }
+    .footer-logo {
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 18px;
+      letter-spacing: 4px; text-transform: uppercase; color: var(--brass);
+    }
+    .footer-copy { font-size: 12px; color: var(--text-dim); letter-spacing: 1px; }
+    .footer-links { display: flex; gap: 24px; list-style: none; }
+    .footer-links a {
+      font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim); text-decoration: none; transition: color 0.3s;
+    }
+    .footer-links a:hover { color: var(--brass-light); }
+
+    @media (max-width: 768px) {
+      nav { padding: 16px 20px; }
+      .nav-links { display: none; }
+      .page-header { padding: 120px 24px 60px; }
+      .content-wrap { padding: 48px 24px 80px; }
+      .do-dont { grid-template-columns: 1fr; }
+      .service-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+      footer { flex-direction: column; gap: 20px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="nav-logo"><img src="logo-full.png" alt="DripCheck" style="height:36px;width:36px;object-fit:contain;vertical-align:middle;margin-right:10px;">DripCheck</a>
+    <ul class="nav-links">
+      <li><a href="index.html#about">The Vault</a></li>
+      <li><a href="index.html#features">Features</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <a href="index.html#download" class="nav-cta">Get the App</a>
+  </nav>
+
+  <div class="page-header">
+    <div class="page-eyebrow">Legal</div>
+    <h1 class="page-title">Privacy <span>Policy</span></h1>
+    <p class="page-meta">Effective Date: February 28, 2026 &nbsp;·&nbsp; Last Updated: February 28, 2026</p>
+  </div>
+
+  <div class="content-wrap">
+
+    <div class="policy-section">
+      <span class="section-label">01</span>
+      <h2 class="section-heading">Introduction</h2>
+      <p>DripCheck ("we," "our," or "us") operates the DripCheck mobile application. This Privacy Policy explains how we collect, use, and protect your personal information when you use our app.</p>
+      <p>By using DripCheck, you agree to the collection and use of information in accordance with this policy.</p>
+    </div>
+
+    <div class="policy-section">
+      <span class="section-label">02</span>
+      <h2 class="section-heading">Information We Collect</h2>
+      <p><strong style="color:var(--text-bright)">Information You Provide:</strong></p>
+      <ul class="policy-list">
+        <li><strong style="color:var(--text-bright)">Account Information:</strong> Email address, password (encrypted), username</li>
+        <li><strong style="color:var(--text-bright)">Profile Data:</strong> Name, preferences, style settings</li>
+        <li><strong style="color:var(--text-bright)">Wardrobe Content:</strong> Photos of clothing items you upload</li>
+        <li><strong style="color:var(--text-bright)">Outfit Photos:</strong> Photos you submit for AI rating</li>
+        <li><strong style="color:var(--text-bright)">Usage Data:</strong> App interactions, features used, ratings given</li>
+      </ul>
+      <p style="margin-top:20px"><strong style="color:var(--text-bright)">Automatically Collected:</strong></p>
+      <ul class="policy-list">
+        <li><strong style="color:var(--text-bright)">Device Information:</strong> Device type, OS version, app version</li>
+        <li><strong style="color:var(--text-bright)">Analytics:</strong> Screen views, feature usage (via Mixpanel)</li>
+        <li><strong style="color:var(--text-bright)">Error Reports:</strong> Crash logs, error messages (via Sentry)</li>
+      </ul>
+    </div>
+
+    <div class="policy-section">
+      <span class="section-label">03</span>
+      <h2 class="section-heading">How We Use Your Information</h2>
+      <ul class="policy-list">
+        <li><strong style="color:var(--text-bright)">Provide Services:</strong> AI outfit analysis, wardrobe organization, outfit generation</li>
+        <li><strong style="color:var(--text-bright)">Improve Experience:</strong> Personalize recommendations based on your style</li>
+        <li><strong style="color:var(--text-bright)">Communication:</strong> Send important updates, respond to support requests</li>
+        <li><strong style="color:var(--text-bright)">Analytics:</strong> Understand usage patterns to improve the app</li>
+        <li><strong style="color:var(--text-bright)">Legal Compliance:</strong> Comply with applicable laws and regulations</li>
+      </ul>
+    </div>
+
+    <div class="policy-section">
+      <span class="section-label">04</span>
+      <h2 class="section-heading">AI and Third-Party Services</h2>
+      <p>We use the following third-party services to operate DripCheck:</p>
+      <div class="services-grid">
+        <div class="service-row">
+          <span class="service-name">Google Gemini AI</span>
+          <span class="service-desc">Analyzes outfit photos and wardrobe items. Images are processed securely and are not stored by Google.</span>
+        </div>
+        <div class="service-row">
+          <span class="service-name">Supabase</span>
+          <span class="service-desc">Secure cloud storage for your data, encrypted at rest.</span>
+        </div>
+        <div class="service-row">
+          <span class="service-name">Mixpanel</span>
+          <span class="service-desc">Anonymous analytics only. No personal photos are shared.</span>
+        </div>
+        <div class="service-row">
+          <span class="service-name">Sentry</span>
+          <span class="service-desc">Error monitoring and crash reporting. No personal data is shared.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="policy-section">
+      <span class="section-label">05</span>
+      <h2 class="section-heading">Data Storage and Security</h2>
+      <ul class="policy-list">
+        <li><strong style="color:var(--text-bright)">Encryption:</strong> All data encrypted in transit (SSL/TLS) and at rest</li>
+        <li><strong style="color:var(--text-bright)">Location:</strong> Data stored on secure servers via Supabase infrastructure</li>
+        <li><strong style="color:var(--text-bright)">Access:</strong> Only you can access your wardrobe and ratings</li>
+        <li><strong style="color:var(--text-bright)">Retention:</strong> Data stored until you delete your account</li>
+      </ul>
+    </div>
+
+    <div class="policy-section">
+      <span class="section-label">06</span>
+      <h2 class="section-heading">Data Sharing</h2>
+      <div class="do-dont">
+        <div class="dont-block">
+          <p class="block-title">We Never</p>
+          <ul class="policy-list">
+            <li>Sell your personal information</li>
+            <li>Share your photos with advertisers</li>
+            <li>Use your data for unrelated purposes</li>
+          </ul>
+        </div>
+        <div class="do-block">
+          <p class="block-title">We May Share</p>
+          <ul class="policy-list">
+            <li>With service providers under strict confidentiality</li>
+            <li>If required by law or court order</li>
+            <li>To protect rights and prevent fraud</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="policy-section">
+      <span class="section-label">07</span>
+      <h2 class="section-heading">Your Rights</h2>
+      <p>You have the right to:</p>
+      <ul class="policy-list">
+        <li><strong style="color:var(--text-bright)">Access:</strong> Request a copy of your data</li>
+        <li><strong style="color:var(--text-bright)">Delete:</strong> Permanently delete your account by emailing privacy@trydripcheck.com</li>
+        <li><strong style="color:var(--text-bright)">Correct:</strong> Update inaccurate information in-app or via support</li>
+        <li><strong style="color:var(--text-bright)">Export:</strong> Download your wardrobe data</li>
+        <li><strong style="color:var(--text-bright)">Opt-out:</strong> Disable analytics in app settings</li>
+      </ul>
+      <div class="info-card" style="margin-top:24px">
+        <p>For GDPR or CCPA requests, email <strong style="color:var(--brass-light)">privacy@trydripcheck.com</strong></p>
+      </div>
+    </div>
+
+    <div class="policy-section">
+      <span class="section-label">08</span>
+      <h2 class="section-heading">Children's Privacy</h2>
+      <p>DripCheck is not intended for users under 13 years old. We do not knowingly collect data from children under 13. If we learn we have collected data from a child under 13, we will delete it immediately.</p>
+    </div>
+
+    <div class="policy-section">
+      <span class="section-label">09</span>
+      <h2 class="section-heading">Changes to This Policy</h2>
+      <p>We may update this Privacy Policy from time to time. Changes will be posted on this page with an updated "Last Updated" date. Continued use of DripCheck after changes constitutes your acceptance of the updated policy.</p>
+    </div>
+
+    <div class="policy-section">
+      <span class="section-label">10</span>
+      <h2 class="section-heading">Governing Law</h2>
+      <p>This Privacy Policy is governed by the laws of India.</p>
+    </div>
+
+    <div class="brass-divider"></div>
+
+    <div class="policy-section">
+      <h2 class="section-heading">Contact Us</h2>
+      <p>For questions, concerns, or data requests:</p>
+      <div class="contact-highlight" style="margin-top:20px">
+        <div class="contact-row">
+          <span class="contact-label">Privacy</span>
+          <a href="mailto:privacy@trydripcheck.com">privacy@trydripcheck.com</a>
+        </div>
+        <div class="contact-row">
+          <span class="contact-label">Support</span>
+          <a href="mailto:support@trydripcheck.com">support@trydripcheck.com</a>
+        </div>
+        <div class="contact-row">
+          <span class="contact-label">Website</span>
+          <a href="https://trydripcheck.com">trydripcheck.com</a>
+        </div>
+      </div>
+      <div class="info-card">
+        <p>To request account deletion, email <strong style="color:var(--brass-light)">privacy@trydripcheck.com</strong> with subject line <strong style="color:var(--text-bright)">"Delete My Account"</strong>. We will respond within 30 days.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <span class="footer-logo" style="display:flex;align-items:center;gap:10px;"><img src="logo-full.png" alt="DripCheck" style="height:32px;width:32px;object-fit:contain;">DripCheck</span>
+    <span class="footer-copy">© 2025 DripCheck. All rights reserved.</span>
+    <ul class="footer-links">
+      <li><a href="privacy.html">Privacy</a></li>
+      <li><a href="terms.html">Terms</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+  </footer>
+
+  <script>
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); }
+      });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.policy-section').forEach(function(el) { observer.observe(el); });
+  </script>
+</body>
+</html>
