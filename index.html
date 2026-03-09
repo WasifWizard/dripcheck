@@ -11,7 +11,6 @@
   <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.halo.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
       --black: #050403; --brass: #b8860b; --brass-light: #D4A84B;
       --brass-dim: rgba(184,134,11,0.25); --brass-border: rgba(184,134,11,0.3);
@@ -257,7 +256,7 @@
     .post-score-badge {
       position: absolute; top: 16px; right: 16px; z-index: 2;
       width: 56px; height: 56px; border-radius: 50%;
-      background: conic-gradient(var(--brass-light) 0deg, var(--brass) 306deg, rgba(184,134,11,0.15) 306deg);
+      background: conic-gradient(var(--brass-light) 0deg, var(--brass) 144deg, rgba(184,134,11,0.15) 144deg);
       display: flex; align-items: center; justify-content: center;
       box-shadow: 0 0 20px rgba(184,134,11,0.3);
     }
@@ -624,27 +623,32 @@
         <!-- FEATURED POST CARD -->
         <div class="featured-post fade-up">
           <div class="post-img-wrap">
+            <!-- TO UPDATE: swap featured-fit.jpg with new photo, update handle/verdict/tags below -->
+            <img src="featured-fit.jpg" alt="Featured Fit" style="width:100%; height:100%; object-fit:cover; display:block;">
+            <!-- PLACEHOLDER (uncomment below and remove img above when no featured fit is available)
             <div class="post-placeholder">
               <div class="post-placeholder-icon">👔</div>
               <span>Today's Featured Fit</span>
               <span style="font-size:11px; opacity:0.5">Submit yours on Instagram</span>
             </div>
+            -->
             <div class="post-rated-badge">
               <img src="logo-full.png" alt="DripCheck">
               <span>Rated by DripCheck</span>
             </div>
             <div class="post-score-badge">
-              <span>8.5</span>
+              <span>4</span>
             </div>
           </div>
           <div class="post-body">
-            <div class="post-handle">@featured_user · Today's Pick</div>
-            <p class="post-verdict">"The monochrome palette is doing serious work here. Silhouette is clean, proportions are balanced. The sneakers are the only thing holding this back from a 9."</p>
+            <!-- TO UPDATE: change handle, verdict text, and tags when featuring a new fit -->
+            <div class="post-handle">Style Vault · Today's Pick</div>
+            <p class="post-verdict">"Confused campus look — is it business casual or chill vibes? The green denim jacket fights the grey trousers and neither wins. Needs a clear direction."</p>
             <div class="post-tags">
-              <span class="post-tag green">Silhouette ✓</span>
-              <span class="post-tag green">Color ✓</span>
-              <span class="post-tag green">Fit ✓</span>
-              <span class="post-tag red">Shoes ✗</span>
+              <span class="post-tag green">Shoes ✓</span>
+              <span class="post-tag red">Jacket ✗</span>
+              <span class="post-tag red">Color Mix ✗</span>
+              <span class="post-tag red">Occasion ✗</span>
             </div>
           </div>
         </div>
@@ -828,8 +832,5 @@
     document.getElementById('tipRing').style.background =
       'conic-gradient(var(--brass-light) 0deg, var(--brass) ' + deg + 'deg, rgba(184,134,11,0.15) ' + deg + 'deg)';
   </script>
-</body>
-</html>
-
 </body>
 </html>
