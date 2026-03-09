@@ -2,417 +2,685 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/png" href="logo-full.png?v=1">
-  <link rel="apple-touch-icon" href="logo-full.png?v=1">
+  <link rel="icon" type="image/png" href="logo-full.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DripCheck — The Vault</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet" />
+  <title>DripCheck — Your AI Style Judge</title>
+  <meta name="description" content="DripCheck scores your outfit with brutal honesty. AI-powered style ratings, wardrobe tracking, and personalized feedback.">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.halo.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --black: #050403;
-      --brass: #b8860b;
-      --brass-light: #D4A84B;
-      --brass-dim: rgba(184,134,11,0.25);
-      --brass-border: rgba(184,134,11,0.3);
-      --text: rgba(255,255,255,0.72);
-      --text-bright: rgba(255,255,255,0.92);
-      --text-dim: rgba(255,255,255,0.4);
-      --green: #4CAF50;
+      --black: #050403; --brass: #b8860b; --brass-light: #D4A84B;
+      --brass-dim: rgba(184,134,11,0.25); --brass-border: rgba(184,134,11,0.3);
+      --text: rgba(255,255,255,0.72); --text-bright: rgba(255,255,255,0.92);
+      --text-dim: rgba(255,255,255,0.4); --green: #4CAF50; --red: #F44336;
       --card-bg: rgba(14,11,7,0.95);
     }
-
     html { scroll-behavior: smooth; }
-
-    body {
-      background-color: var(--black);
-      color: var(--text);
-      font-family: 'Barlow', sans-serif;
-      font-size: 16px;
-      line-height: 1.6;
-      overflow-x: hidden;
-    }
-
+    body { background: var(--black); color: var(--text); font-family: 'Barlow', sans-serif; font-size: 16px; line-height: 1.6; overflow-x: hidden; }
     body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 9999;
-      opacity: 0.4;
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.35;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
     }
+    .full-width { width: 100vw; margin-left: calc(-50vw + 50%); }
+    .brass-divider { height: 1px; background: linear-gradient(to right, transparent, var(--brass-border), var(--brass), var(--brass-border), transparent); }
+    .glow { position: absolute; border-radius: 50%; filter: blur(120px); pointer-events: none; }
 
-    /* NAV */
+    /* ── NAV ── */
     nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 20px 48px;
-      background: linear-gradient(to bottom, rgba(5,4,3,0.95), transparent);
-      backdrop-filter: blur(2px);
-      transition: all 0.3s;
+      display: flex; align-items: center; justify-content: space-between; padding: 16px 48px;
+      background: linear-gradient(to bottom, rgba(5,4,3,0.97), transparent);
+      backdrop-filter: blur(2px); transition: all 0.3s;
     }
+    nav.scrolled { background: rgba(5,4,3,0.97); border-bottom: 1px solid var(--brass-border); backdrop-filter: blur(12px); }
     .nav-logo {
-      font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 22px;
-      letter-spacing: 4px; text-transform: uppercase; color: var(--brass-light); text-decoration: none;
+      display: flex; align-items: center; gap: 10px; text-decoration: none;
+      font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 20px;
+      letter-spacing: 4px; text-transform: uppercase; color: var(--brass-light);
     }
-    .nav-links { display: flex; gap: 36px; list-style: none; }
-    .nav-links a {
-      font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
-      color: var(--text-dim); text-decoration: none; transition: color 0.3s;
-    }
+    .nav-logo img { height: 34px; width: 34px; object-fit: contain; }
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); text-decoration: none; transition: color 0.3s; }
     .nav-links a:hover { color: var(--brass-light); }
     .nav-cta {
       font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
       color: var(--black); background: linear-gradient(135deg, var(--brass), var(--brass-light));
-      border: none; padding: 10px 24px; border-radius: 6px; cursor: pointer;
-      transition: opacity 0.3s, transform 0.2s;
+      border: none; padding: 10px 22px; border-radius: 6px; cursor: pointer; transition: all 0.2s;
     }
     .nav-cta:hover { opacity: 0.85; transform: translateY(-1px); }
 
-    /* HERO */
+    /* ── HERO ── */
     .hero {
       position: relative; min-height: 100vh;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      text-align: center; padding: 120px 24px 80px; overflow: hidden;
+      text-align: center; padding: 120px 24px 100px; overflow: hidden;
       width: 100vw; margin-left: calc(-50vw + 50%);
     }
-    #vanta-hero {
-      position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0;
-    }
-    /* Darken the vanta scene so text stays legible */
-    .hero-overlay {
-      position: absolute; inset: 0; z-index: 1;
-      background: radial-gradient(ellipse at center, rgba(5,4,3,0.3) 0%, rgba(5,4,3,0.65) 100%);
-    }
-    .hero-content { position: relative; z-index: 2; }
-
+    #vanta-hero { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
+    .hero-overlay { position: absolute; inset: 0; z-index: 1; background: radial-gradient(ellipse at center, rgba(5,4,3,0.2) 0%, rgba(5,4,3,0.7) 100%); }
+    .hero-content { position: relative; z-index: 2; max-width: 800px; }
     .hero-eyebrow {
-      display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 4px;
-      text-transform: uppercase; color: var(--brass); border: 1px solid var(--brass-border);
-      padding: 6px 18px; border-radius: 100px; margin-bottom: 28px; background: rgba(184,134,11,0.07);
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 11px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase;
+      color: var(--brass); border: 1px solid var(--brass-border); padding: 6px 18px;
+      border-radius: 100px; margin-bottom: 28px; background: rgba(184,134,11,0.07);
     }
+    .eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--brass); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
     .hero-title {
       font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
-      font-size: clamp(64px, 12vw, 140px); line-height: 0.9;
-      letter-spacing: 6px; text-transform: uppercase; margin-bottom: 12px;
+      font-size: clamp(60px, 11vw, 130px); line-height: 0.88; letter-spacing: 5px;
+      text-transform: uppercase; margin-bottom: 20px;
     }
-    .hero-title span {
+    .hero-title .gold {
       background: linear-gradient(135deg, var(--brass), var(--brass-light), var(--brass));
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
-    .hero-tagline {
-      font-family: 'Playfair Display', serif; font-size: clamp(16px, 2.5vw, 22px);
-      font-style: italic; color: var(--text-dim); margin-bottom: 32px; letter-spacing: 1px;
+    .hero-title .white { color: var(--text-bright); }
+    .hero-sub {
+      font-family: 'Playfair Display', serif; font-size: clamp(16px, 2.2vw, 20px);
+      font-style: italic; color: var(--text-dim); margin-bottom: 20px; letter-spacing: 0.5px;
     }
-    .hero-desc {
-      max-width: 520px; margin: 0 auto 52px; font-size: 16px; color: var(--text); line-height: 1.8;
-    }
-    .hero-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
-    .btn-primary {
+    .hero-desc { max-width: 500px; margin: 0 auto 48px; font-size: 15px; color: var(--text); line-height: 1.8; }
+    .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn-gold {
       display: inline-flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 700;
       letter-spacing: 2px; text-transform: uppercase; color: var(--black);
       background: linear-gradient(135deg, var(--brass), var(--brass-light));
-      border: none; padding: 18px 36px; border-radius: 8px; cursor: pointer;
-      text-decoration: none; transition: all 0.3s; height: 56px;
+      border: none; padding: 16px 32px; border-radius: 8px; cursor: pointer;
+      text-decoration: none; transition: all 0.3s; height: 52px;
     }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(184,134,11,0.35); }
-    .btn-secondary {
+    .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(184,134,11,0.4); }
+    .btn-outline {
       display: inline-flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 700;
       letter-spacing: 2px; text-transform: uppercase; color: var(--text-bright);
       background: transparent; border: 1px solid var(--brass-border);
-      padding: 18px 36px; border-radius: 8px; cursor: pointer; text-decoration: none;
-      transition: all 0.3s; height: 56px;
+      padding: 16px 32px; border-radius: 8px; cursor: pointer; text-decoration: none;
+      transition: all 0.3s; height: 52px;
     }
-    .btn-secondary:hover { border-color: var(--brass); background: rgba(184,134,11,0.06); transform: translateY(-2px); }
-
+    .btn-outline:hover { border-color: var(--brass); background: rgba(184,134,11,0.06); transform: translateY(-2px); }
     .hero-scroll {
-      position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+      position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
       display: flex; flex-direction: column; align-items: center; gap: 8px;
       color: var(--text-dim); font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
-      animation: bounce 2s infinite; z-index: 2;
+      animation: scrollBounce 2s infinite; z-index: 2;
     }
-    .scroll-line { width: 1px; height: 40px; background: linear-gradient(to bottom, var(--brass), transparent); }
-    @keyframes bounce {
-      0%, 100% { transform: translateX(-50%) translateY(0); }
-      50% { transform: translateX(-50%) translateY(6px); }
-    }
+    .scroll-line { width: 1px; height: 36px; background: linear-gradient(to bottom, var(--brass), transparent); }
+    @keyframes scrollBounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(6px)} }
 
-    /* DIVIDER & FULL WIDTH */
-    .brass-divider {
-      width: 100%; height: 1px;
-      background: linear-gradient(to right, transparent, var(--brass-border), var(--brass), var(--brass-border), transparent);
+    /* ── SOCIAL PROOF BAR ── */
+    .proof-bar {
+      display: flex; align-items: center; justify-content: center; gap: 48px;
+      padding: 28px 48px; flex-wrap: wrap;
+      background: rgba(184,134,11,0.04); border-top: 1px solid var(--brass-border); border-bottom: 1px solid var(--brass-border);
     }
-    .full-width { width: 100vw; margin-left: calc(-50vw + 50%); }
+    .proof-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .proof-num { font-family: 'Barlow Condensed', sans-serif; font-size: 32px; font-weight: 900; color: var(--brass-light); letter-spacing: 2px; }
+    .proof-label { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim); }
+    .proof-sep { width: 1px; height: 40px; background: var(--brass-border); }
 
-    /* SECTIONS */
+    /* ── SECTION BASE ── */
     section { position: relative; padding: 100px 48px; max-width: 1200px; margin: 0 auto; }
-    .section-eyebrow {
-      font-size: 11px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase;
-      color: var(--brass); margin-bottom: 16px;
+    .section-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; color: var(--brass); margin-bottom: 14px; }
+    .section-title { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(34px, 5vw, 62px); font-weight: 900; letter-spacing: 3px; text-transform: uppercase; color: var(--text-bright); line-height: 1; margin-bottom: 18px; }
+    .section-sub { font-size: 16px; color: var(--text); max-width: 520px; line-height: 1.8; margin-bottom: 60px; }
+    .fade-up { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── VIDEO DEMO ── */
+    .demo-wrap {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center;
     }
-    .section-title {
-      font-family: 'Barlow Condensed', sans-serif; font-size: clamp(36px, 5vw, 64px);
-      font-weight: 900; letter-spacing: 3px; text-transform: uppercase;
-      color: var(--text-bright); line-height: 1; margin-bottom: 20px;
+    .demo-text .section-sub { margin-bottom: 32px; }
+    .demo-points { display: flex; flex-direction: column; gap: 16px; }
+    .demo-point { display: flex; align-items: flex-start; gap: 16px; }
+    .demo-point-num {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 900;
+      letter-spacing: 2px; color: var(--brass); background: rgba(184,134,11,0.1);
+      border: 1px solid var(--brass-border); border-radius: 50%; width: 28px; height: 28px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;
     }
-    .section-sub {
-      font-size: 16px; color: var(--text); max-width: 540px; line-height: 1.8; margin-bottom: 64px;
+    .demo-point-text strong { color: var(--text-bright); display: block; margin-bottom: 4px; font-size: 15px; }
+    .demo-point-text span { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+    .video-frame {
+      position: relative; border-radius: 20px; overflow: hidden;
+      border: 1px solid var(--brass-border);
+      box-shadow: 0 0 60px rgba(184,134,11,0.12), 0 40px 80px rgba(0,0,0,0.5);
+      background: #000;
+    }
+    .video-frame::before {
+      content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      border-radius: 20px; border: 1px solid rgba(184,134,11,0.2);
+    }
+    .video-frame iframe {
+      width: 100%; aspect-ratio: 9/16; display: block; border: none; max-height: 580px;
     }
 
-    /* WHAT GRID */
-    .what-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 60px; }
-    .what-card {
+    /* ── HOW IT WORKS ── */
+    .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-top: 60px; }
+    .step-card {
       background: var(--card-bg); border: 1px solid var(--brass-border);
-      padding: 48px 40px; position: relative; overflow: hidden; transition: border-color 0.3s;
+      padding: 48px 36px; position: relative; overflow: hidden; transition: border-color 0.3s;
     }
-    .what-card:hover { border-color: rgba(184,134,11,0.6); }
-    .what-card::before {
+    .step-card:first-child { border-radius: 16px 0 0 16px; }
+    .step-card:last-child  { border-radius: 0 16px 16px 0; }
+    .step-card:hover { border-color: rgba(184,134,11,0.6); }
+    .step-card::after {
       content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
       background: linear-gradient(to right, transparent, var(--brass), transparent);
       opacity: 0; transition: opacity 0.3s;
     }
-    .what-card:hover::before { opacity: 1; }
-    .what-card:first-child  { border-radius: 16px 0 0 0; }
-    .what-card:nth-child(2) { border-radius: 0 16px 0 0; }
-    .what-card:nth-child(3) { border-radius: 0 0 0 16px; }
-    .what-card:last-child   { border-radius: 0 0 16px 0; }
-    .what-icon { font-size: 32px; margin-bottom: 20px; }
-    .what-card h3 {
+    .step-card:hover::after { opacity: 1; }
+    .step-num {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 72px; font-weight: 900;
+      color: rgba(184,134,11,0.08); position: absolute; top: 16px; right: 24px; line-height: 1;
+    }
+    .step-icon { font-size: 36px; margin-bottom: 20px; }
+    .step-card h3 {
       font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 900;
       letter-spacing: 2px; text-transform: uppercase; color: var(--text-bright); margin-bottom: 12px;
     }
-    .what-card p { font-size: 14px; color: var(--text); line-height: 1.8; }
+    .step-card p { font-size: 14px; color: var(--text); line-height: 1.8; }
+    .step-arrow {
+      position: absolute; right: -14px; top: 50%; transform: translateY(-50%);
+      width: 28px; height: 28px; background: var(--black); border: 1px solid var(--brass-border);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      color: var(--brass); font-size: 12px; z-index: 2;
+    }
 
-    /* SCORE */
-    .score-showcase { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
-    .score-circle {
-      width: 160px; height: 160px; border-radius: 50%; flex-shrink: 0;
-      background: conic-gradient(var(--brass) 0deg, var(--brass-light) 280deg, rgba(184,134,11,0.15) 280deg);
+    /* ── STYLE TIP OF THE DAY ── */
+    .tip-wrap {
+      width: 100vw; margin-left: calc(-50vw + 50%);
+      background: linear-gradient(135deg, rgba(184,134,11,0.06), rgba(184,134,11,0.02));
+      border-top: 1px solid var(--brass-border); border-bottom: 1px solid var(--brass-border);
+    }
+    .tip-inner { max-width: 1200px; margin: 0 auto; padding: 80px 48px; }
+    .tip-card {
+      display: grid; grid-template-columns: auto 1fr auto; gap: 40px; align-items: center;
+      background: var(--card-bg); border: 1px solid var(--brass-border); border-radius: 20px;
+      padding: 48px; position: relative; overflow: hidden;
+    }
+    .tip-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(to right, transparent, var(--brass-light), transparent);
+    }
+    .tip-date-block { text-align: center; }
+    .tip-day { font-family: 'Barlow Condensed', sans-serif; font-size: 52px; font-weight: 900; color: var(--brass-light); line-height: 1; }
+    .tip-month { font-size: 11px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; color: var(--text-dim); }
+    .tip-divider-v { width: 1px; height: 100%; background: var(--brass-border); }
+    .tip-label { font-size: 10px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; color: var(--brass); margin-bottom: 12px; }
+    .tip-title { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; color: var(--text-bright); margin-bottom: 12px; }
+    .tip-text { font-size: 15px; color: var(--text); line-height: 1.8; }
+    .tip-score-block { text-align: center; flex-shrink: 0; }
+    .tip-score-label { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; }
+    .tip-score-ring {
+      width: 80px; height: 80px; border-radius: 50%; position: relative;
+      background: conic-gradient(var(--brass-light) 0deg, var(--brass) var(--tip-deg, 270deg), rgba(184,134,11,0.15) var(--tip-deg, 270deg));
       display: flex; align-items: center; justify-content: center;
-      position: relative; box-shadow: 0 0 60px rgba(184,134,11,0.2);
+      box-shadow: 0 0 30px rgba(184,134,11,0.2);
     }
-    .score-circle::before { content: ''; position: absolute; inset: 8px; background: var(--black); border-radius: 50%; }
-    .score-num {
-      position: relative; z-index: 1; font-family: 'Barlow Condensed', sans-serif;
-      font-size: 56px; font-weight: 900; color: var(--brass-light);
+    .tip-score-ring::before { content: ''; position: absolute; inset: 7px; background: var(--card-bg); border-radius: 50%; }
+    .tip-score-num { position: relative; z-index: 1; font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 900; color: var(--brass-light); }
+    .tip-tag { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 4px 12px; border-radius: 100px; border: 1px solid var(--brass-border); background: rgba(184,134,11,0.08); color: var(--brass); margin-top: 10px; }
+
+    /* ── FEATURED FIT ── */
+    .featured-wrap {
+      width: 100vw; margin-left: calc(-50vw + 50%);
+      background: var(--black);
     }
-    .score-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
-    .score-tag {
-      font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
-      padding: 5px 12px; border-radius: 100px; border: 1px solid var(--brass-border);
+    .featured-inner { max-width: 1200px; margin: 0 auto; padding: 100px 48px; }
+    .featured-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 60px; align-items: start; }
+    .featured-post {
+      background: var(--card-bg); border: 1px solid var(--brass-border); border-radius: 20px;
+      overflow: hidden; transition: all 0.3s; position: relative;
+    }
+    .featured-post:hover { border-color: rgba(184,134,11,0.6); transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+    .post-img-wrap { position: relative; background: #111; aspect-ratio: 4/5; overflow: hidden; }
+    .post-placeholder {
+      width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 16px; color: var(--text-dim); font-size: 13px; letter-spacing: 2px; text-transform: uppercase;
+      background: linear-gradient(135deg, rgba(184,134,11,0.04), rgba(184,134,11,0.01));
+    }
+    .post-placeholder-icon { font-size: 48px; opacity: 0.4; }
+    .post-rated-badge {
+      position: absolute; top: 16px; left: 16px; z-index: 2;
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(5,4,3,0.9); border: 1px solid var(--brass-border);
+      backdrop-filter: blur(8px); padding: 8px 14px; border-radius: 100px;
+    }
+    .post-rated-badge img { width: 20px; height: 20px; object-fit: contain; }
+    .post-rated-badge span { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--brass-light); }
+    .post-score-badge {
+      position: absolute; top: 16px; right: 16px; z-index: 2;
+      width: 56px; height: 56px; border-radius: 50%;
+      background: conic-gradient(var(--brass-light) 0deg, var(--brass) 306deg, rgba(184,134,11,0.15) 306deg);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 20px rgba(184,134,11,0.3);
+    }
+    .post-score-badge::before { content: ''; position: absolute; inset: 5px; background: rgba(5,4,3,0.95); border-radius: 50%; }
+    .post-score-badge span { position: relative; z-index: 1; font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 900; color: var(--brass-light); }
+    .post-body { padding: 28px; }
+    .post-handle { font-size: 13px; font-weight: 600; color: var(--brass-light); margin-bottom: 8px; letter-spacing: 0.5px; }
+    .post-verdict {
+      font-family: 'Playfair Display', serif; font-style: italic; font-size: 14px;
+      color: var(--text); line-height: 1.7; margin-bottom: 16px;
+    }
+    .post-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .post-tag {
+      font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 4px 10px; border-radius: 100px; border: 1px solid var(--brass-border);
       background: rgba(184,134,11,0.06); color: var(--brass-light);
     }
-    .score-tag.red { border-color: rgba(244,67,54,0.3); background: rgba(244,67,54,0.06); color: #F44336; }
-    .score-verdict {
-      flex: 1; min-width: 280px; background: var(--card-bg);
-      border: 1px solid var(--brass-border); border-radius: 16px; padding: 36px;
-      position: relative; overflow: hidden;
+    .post-tag.red { border-color: rgba(244,67,54,0.3); background: rgba(244,67,54,0.06); color: #F44336; }
+    .post-tag.green { border-color: rgba(76,175,80,0.3); background: rgba(76,175,80,0.06); color: #4CAF50; }
+    .featured-cta-block {
+      background: var(--card-bg); border: 1px solid var(--brass-border); border-radius: 20px;
+      padding: 48px; display: flex; flex-direction: column; justify-content: center; gap: 28px;
     }
-    .score-verdict::after {
-      content: '"'; position: absolute; top: -10px; right: 20px;
-      font-family: 'Playfair Display', serif; font-size: 120px; color: var(--brass-dim); line-height: 1;
+    .featured-cta-block h3 {
+      font-family: 'Barlow Condensed', sans-serif; font-size: 32px; font-weight: 900;
+      letter-spacing: 3px; text-transform: uppercase; color: var(--text-bright); line-height: 1.1;
     }
-    .score-verdict p {
-      font-family: 'Playfair Display', serif; font-size: 18px; font-style: italic;
-      color: var(--text); line-height: 1.8; position: relative; z-index: 1;
+    .featured-cta-block h3 span {
+      background: linear-gradient(135deg, var(--brass), var(--brass-light));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
-    .verdict-label {
-      font-family: 'Barlow', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 2px;
-      text-transform: uppercase; color: var(--brass); font-style: normal; margin-bottom: 16px; display: block;
+    .featured-cta-block p { font-size: 14px; color: var(--text); line-height: 1.8; }
+    .ig-steps { display: flex; flex-direction: column; gap: 14px; }
+    .ig-step { display: flex; align-items: center; gap: 14px; font-size: 14px; color: var(--text); }
+    .ig-step-icon { width: 36px; height: 36px; border-radius: 50%; background: rgba(184,134,11,0.1); border: 1px solid var(--brass-border); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .ig-handle-input {
+      display: flex; gap: 10px; align-items: center;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--brass-border);
+      border-radius: 10px; padding: 12px 16px; font-size: 14px; color: var(--text-dim);
     }
+    .ig-handle-input span { color: var(--brass); }
 
-    /* FEATURES */
+    /* ── EARLY ACCESS MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 2000; background: rgba(5,4,3,0.92);
+      backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center;
+      padding: 24px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--card-bg); border: 1px solid var(--brass-border); border-radius: 20px;
+      padding: 56px 48px; max-width: 520px; width: 100%; position: relative;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+    }
+    .modal::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; border-radius: 20px 20px 0 0;
+      background: linear-gradient(to right, transparent, var(--brass-light), transparent);
+    }
+    .modal-close {
+      position: absolute; top: 20px; right: 20px; background: none; border: none;
+      color: var(--text-dim); font-size: 22px; cursor: pointer; transition: color 0.2s; line-height: 1;
+    }
+    .modal-close:hover { color: var(--text-bright); }
+    .modal-logo { width: 56px; height: 56px; object-fit: contain; margin-bottom: 20px; filter: drop-shadow(0 0 16px rgba(184,134,11,0.4)); }
+    .modal-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; color: var(--brass); margin-bottom: 12px; }
+    .modal-title { font-family: 'Barlow Condensed', sans-serif; font-size: 36px; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; color: var(--text-bright); margin-bottom: 10px; line-height: 1.1; }
+    .modal-title span { background: linear-gradient(135deg, var(--brass), var(--brass-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .modal-sub { font-size: 14px; color: var(--text-dim); line-height: 1.7; margin-bottom: 32px; }
+    .modal-form { display: flex; flex-direction: column; gap: 14px; }
+    .modal-input {
+      background: rgba(255,255,255,0.04); border: 1px solid var(--brass-border); border-radius: 10px;
+      padding: 16px 20px; font-size: 15px; color: var(--text-bright); font-family: 'Barlow', sans-serif;
+      transition: border-color 0.3s; outline: none; width: 100%;
+    }
+    .modal-input::placeholder { color: var(--text-dim); }
+    .modal-input:focus { border-color: var(--brass-light); }
+    .modal-submit {
+      width: 100%; padding: 18px; border: none; border-radius: 10px; cursor: pointer;
+      font-family: 'Barlow', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 3px;
+      text-transform: uppercase; color: var(--black);
+      background: linear-gradient(135deg, var(--brass), var(--brass-light));
+      transition: all 0.3s;
+    }
+    .modal-submit:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(184,134,11,0.4); }
+    .modal-note { font-size: 11px; color: var(--text-dim); text-align: center; letter-spacing: 0.5px; }
+    .modal-success { display: none; text-align: center; padding: 20px 0; }
+    .modal-success .success-icon { font-size: 52px; margin-bottom: 16px; }
+    .modal-success h3 { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; color: var(--text-bright); margin-bottom: 10px; }
+    .modal-success p { font-size: 14px; color: var(--text-dim); line-height: 1.7; }
+
+    /* ── FEATURES ── */
     .features-grid {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
       background: var(--brass-border); border: 1px solid var(--brass-border);
       border-radius: 16px; overflow: hidden; margin-top: 12px;
     }
-    .feature-item { background: var(--card-bg); padding: 48px 36px; transition: background 0.3s; }
+    .feature-item { background: var(--card-bg); padding: 44px 32px; transition: background 0.3s; }
     .feature-item:hover { background: rgba(184,134,11,0.04); }
-    .feature-num {
-      font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700;
-      letter-spacing: 3px; color: var(--brass); margin-bottom: 28px; display: block;
-    }
-    .feature-item h3 {
-      font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 900;
-      letter-spacing: 2px; text-transform: uppercase; color: var(--text-bright); margin-bottom: 14px; line-height: 1.1;
-    }
+    .feature-num { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 3px; color: var(--brass); margin-bottom: 24px; display: block; }
+    .feature-item h3 { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; color: var(--text-bright); margin-bottom: 12px; line-height: 1.1; }
     .feature-item p { font-size: 14px; color: var(--text); line-height: 1.8; }
 
-    /* MANIFESTO */
-    .manifesto-wrap {
-      width: 100vw; margin-left: calc(-50vw + 50%);
-      background: rgba(184,134,11,0.03); border-top: 1px solid var(--brass-border); border-bottom: 1px solid var(--brass-border);
-    }
-    .manifesto-inner { text-align: center; padding: 120px 48px; max-width: 1200px; margin: 0 auto; }
-    .manifesto-quote {
-      font-family: 'Playfair Display', serif; font-size: clamp(22px, 3.5vw, 40px);
-      font-style: italic; color: var(--text); max-width: 800px; margin: 0 auto 40px; line-height: 1.6;
-    }
+    /* ── MANIFESTO ── */
+    .manifesto-wrap { width: 100vw; margin-left: calc(-50vw + 50%); background: rgba(184,134,11,0.03); border-top: 1px solid var(--brass-border); border-bottom: 1px solid var(--brass-border); }
+    .manifesto-inner { text-align: center; padding: 100px 48px; max-width: 900px; margin: 0 auto; }
+    .manifesto-quote { font-family: 'Playfair Display', serif; font-size: clamp(20px, 3vw, 36px); font-style: italic; color: var(--text); max-width: 800px; margin: 0 auto 36px; line-height: 1.7; }
     .manifesto-quote em { color: var(--brass-light); font-style: normal; }
-    .manifesto-pills { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 40px; }
-    .pill {
-      font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
-      padding: 8px 20px; border-radius: 100px; border: 1px solid var(--brass-border);
-      color: var(--text-dim); background: rgba(184,134,11,0.04);
-    }
+    .manifesto-pills { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 36px; }
+    .pill { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 7px 18px; border-radius: 100px; border: 1px solid var(--brass-border); color: var(--text-dim); background: rgba(184,134,11,0.04); }
 
-    /* DOWNLOAD */
-    .download-cards { display: flex; gap: 20px; justify-content: center; margin-top: 52px; flex-wrap: wrap; }
-    .app-card {
-      background: var(--card-bg); border: 1px solid var(--brass-border); border-radius: 16px;
-      padding: 40px 48px; display: flex; flex-direction: column; align-items: center; gap: 16px;
-      text-decoration: none; transition: all 0.3s; min-width: 240px; position: relative; overflow: hidden;
+    /* ── EARLY ACCESS CTA ── */
+    .cta-section {
+      text-align: center; padding: 100px 48px;
+      width: 100vw; margin-left: calc(-50vw + 50%);
+      background: radial-gradient(ellipse at center, rgba(184,134,11,0.06) 0%, transparent 70%);
     }
-    .app-card::before {
-      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
-      background: linear-gradient(to right, transparent, var(--brass), transparent);
-      transform: scaleX(0); transition: transform 0.4s;
+    .cta-inner { max-width: 600px; margin: 0 auto; }
+    .cta-title { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(40px, 6vw, 72px); font-weight: 900; letter-spacing: 4px; text-transform: uppercase; color: var(--text-bright); line-height: 0.95; margin-bottom: 20px; }
+    .cta-title span { background: linear-gradient(135deg, var(--brass), var(--brass-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .cta-sub { font-size: 15px; color: var(--text-dim); margin-bottom: 40px; line-height: 1.7; }
+    .cta-form { display: flex; gap: 12px; max-width: 460px; margin: 0 auto 16px; }
+    .cta-input {
+      flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--brass-border);
+      border-radius: 10px; padding: 16px 20px; font-size: 15px; color: var(--text-bright);
+      font-family: 'Barlow', sans-serif; outline: none; transition: border-color 0.3s;
     }
-    .app-card:hover { border-color: rgba(184,134,11,0.55); transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
-    .app-card:hover::before { transform: scaleX(1); }
-    .app-icon {
-      width: 64px; height: 64px; border-radius: 16px;
-      background: linear-gradient(135deg, var(--brass), var(--brass-light));
-      display: flex; align-items: center; justify-content: center; font-size: 28px;
+    .cta-input::placeholder { color: var(--text-dim); }
+    .cta-input:focus { border-color: var(--brass-light); }
+    .cta-btn {
+      padding: 16px 28px; border: none; border-radius: 10px; cursor: pointer;
+      font-family: 'Barlow', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--black);
+      background: linear-gradient(135deg, var(--brass), var(--brass-light)); transition: all 0.3s; white-space: nowrap;
     }
-    .app-platform { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--text-dim); }
-    .app-name {
-      font-family: 'Barlow Condensed', sans-serif; font-size: 26px; font-weight: 900;
-      letter-spacing: 2px; text-transform: uppercase; color: var(--text-bright);
-    }
-    .app-badge {
-      font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
-      color: var(--brass); background: rgba(184,134,11,0.1); border: 1px solid var(--brass-border);
-      padding: 4px 14px; border-radius: 100px;
-    }
+    .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(184,134,11,0.4); }
+    .cta-note { font-size: 11px; color: var(--text-dim); letter-spacing: 0.5px; }
+    .cta-success { display: none; }
+    .cta-success-msg { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; color: var(--brass-light); }
 
-    /* FOOTER */
-    footer {
-      border-top: 1px solid var(--brass-border); padding: 40px 48px;
-      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;
-    }
-    .footer-logo {
-      font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 18px;
-      letter-spacing: 4px; text-transform: uppercase; color: var(--brass);
-    }
+    /* ── FOOTER ── */
+    footer { border-top: 1px solid var(--brass-border); padding: 40px 48px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+    .footer-logo { display: flex; align-items: center; gap: 10px; font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 18px; letter-spacing: 4px; text-transform: uppercase; color: var(--brass); }
+    .footer-logo img { height: 30px; width: 30px; object-fit: contain; }
     .footer-copy { font-size: 12px; color: var(--text-dim); letter-spacing: 1px; }
     .footer-links { display: flex; gap: 24px; list-style: none; }
-    .footer-links a {
-      font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
-      color: var(--text-dim); text-decoration: none; transition: color 0.3s;
-    }
+    .footer-links a { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); text-decoration: none; transition: color 0.3s; }
     .footer-links a:hover { color: var(--brass-light); }
 
-    /* ANIMATIONS */
-    .fade-up { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
-    .fade-up.visible { opacity: 1; transform: translateY(0); }
-
-    /* RESPONSIVE */
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .demo-wrap { grid-template-columns: 1fr; }
+      .video-frame { max-width: 320px; margin: 0 auto; }
+      .steps-grid { grid-template-columns: 1fr; }
+      .step-card { border-radius: 0 !important; }
+      .step-card:first-child { border-radius: 16px 16px 0 0 !important; }
+      .step-card:last-child  { border-radius: 0 0 16px 16px !important; }
+      .step-arrow { display: none; }
+      .tip-card { grid-template-columns: 1fr; gap: 24px; }
+      .tip-divider-v { display: none; }
+      .featured-grid { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: 1fr; }
+      .cta-form { flex-direction: column; }
+    }
     @media (max-width: 768px) {
-      nav { padding: 16px 20px; }
+      nav { padding: 14px 20px; }
       .nav-links { display: none; }
       section { padding: 72px 20px; }
-      .what-grid { grid-template-columns: 1fr; }
-      .what-card { border-radius: 0 !important; }
-      .what-card:first-child { border-radius: 16px 16px 0 0 !important; }
-      .what-card:last-child  { border-radius: 0 0 16px 16px !important; }
-      .features-grid { grid-template-columns: 1fr; }
+      .proof-bar { gap: 24px; padding: 24px 20px; }
+      .proof-sep { display: none; }
+      .tip-inner { padding: 60px 20px; }
+      .featured-inner { padding: 72px 20px; }
+      .manifesto-inner { padding: 72px 20px; }
+      .cta-section { padding: 72px 20px; }
       footer { flex-direction: column; gap: 20px; text-align: center; }
-      .manifesto-inner { padding: 80px 20px; }
+      .modal { padding: 40px 28px; }
     }
   </style>
 </head>
 <body>
 
+  <!-- EARLY ACCESS MODAL -->
+  <div class="modal-overlay" id="earlyModal">
+    <div class="modal" style="padding:0; overflow:hidden; max-width:560px; border-radius:20px;">
+      <button class="modal-close" onclick="closeModal()" style="position:absolute;top:16px;right:16px;z-index:10;">✕</button>
+      <iframe
+        src="https://tally.so/r/obGYrO"
+        width="100%"
+        height="520"
+        frameborder="0"
+        marginheight="0"
+        marginwidth="0"
+        title="DripCheck Early Access"
+        style="display:block; border-radius:20px; background:transparent;"
+      ></iframe>
+    </div>
+  </div>
+
   <!-- NAV -->
-  <nav>
-    <a href="#" class="nav-logo"><img src="logo-full.png" alt="DripCheck" style="height:36px;width:36px;object-fit:contain;vertical-align:middle;margin-right:10px;">DripCheck</a>
+  <nav id="mainNav">
+    <a href="index.html" class="nav-logo">
+      <img src="logo-full.png" alt="DripCheck">DripCheck
+    </a>
     <ul class="nav-links">
-      <li><a href="#about">The Vault</a></li>
+      <li><a href="#how-it-works">How It Works</a></li>
+      <li><a href="#featured">Featured Fits</a></li>
       <li><a href="#features">Features</a></li>
-      <li><a href="#download">Download</a></li>
+      <li><a href="contact.html">Contact</a></li>
     </ul>
-    <button class="nav-cta" onclick="document.getElementById('download').scrollIntoView({behavior:'smooth'})">Get the App</button>
+    <button class="nav-cta" onclick="openModal()">Get Early Access</button>
   </nav>
 
   <!-- HERO -->
   <div class="hero">
     <div id="vanta-hero"></div>
     <div class="hero-overlay"></div>
-    <div class="hero-content">
-      <div class="hero-eyebrow">Est. 2025 — The Standard for Style</div>
-      <h1 class="hero-title"><span>DRIP</span><br><span>CHECK</span></h1>
-      <p class="hero-tagline">Not everyone gets in. Neither does every fit.</p>
-      <p class="hero-desc">The AI that doesn't flatter you. DripCheck scores your outfit with brutal honesty, sharp precision, and the eye of a luxury stylist who owes you nothing.</p>
+    <div class="hero-content fade-up">
+      <div class="hero-eyebrow"><span class="eyebrow-dot"></span>Now Accepting Waitlist</div>
+      <h1 class="hero-title">
+        <span class="gold">Your Outfit</span><br>
+        <span class="white">Gets Judged.</span>
+      </h1>
+      <p class="hero-sub">Not everyone gets in. Neither does every fit.</p>
+      <p class="hero-desc">DripCheck is the AI style judge that rates your outfit with brutal honesty — scoring fit, color theory, occasion match, and every piece dragging you down.</p>
       <div class="hero-actions">
-        <a href="#download" class="btn-primary">Download Free</a>
-        <a href="#about" class="btn-secondary">Learn More</a>
+        <button class="btn-gold" onclick="openModal()">Join the Waitlist →</button>
+        <a href="#how-it-works" class="btn-outline">See How It Works</a>
       </div>
     </div>
     <div class="hero-scroll"><div class="scroll-line"></div>Scroll</div>
   </div>
 
+  <!-- SOCIAL PROOF BAR -->
+  <div class="full-width">
+    <div class="proof-bar fade-up">
+      <div class="proof-item">
+        <span class="proof-num">500+</span>
+        <span class="proof-label">Waitlist Members</span>
+      </div>
+      <div class="proof-sep"></div>
+      <div class="proof-item">
+        <span class="proof-num">0–10</span>
+        <span class="proof-label">Outfit Score</span>
+      </div>
+      <div class="proof-sep"></div>
+      <div class="proof-item">
+        <span class="proof-num">AI</span>
+        <span class="proof-label">Powered Analysis</span>
+      </div>
+      <div class="proof-sep"></div>
+      <div class="proof-item">
+        <span class="proof-num">100%</span>
+        <span class="proof-label">Brutally Honest</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIDEO DEMO -->
+  <section id="how-it-works">
+    <div class="demo-wrap">
+      <div class="demo-text fade-up">
+        <div class="section-eyebrow">See It In Action</div>
+        <h2 class="section-title">Watch DripCheck<br>Work</h2>
+        <p class="section-sub">Upload a photo, get a score. It's that fast — and that honest.</p>
+        <div class="demo-points">
+          <div class="demo-point">
+            <div class="demo-point-num">01</div>
+            <div class="demo-point-text">
+              <strong>Upload Your Outfit</strong>
+              <span>Take a photo or pick one from your camera roll. Full body works best.</span>
+            </div>
+          </div>
+          <div class="demo-point">
+            <div class="demo-point-num">02</div>
+            <div class="demo-point-text">
+              <strong>AI Reads Every Detail</strong>
+              <span>Fit, silhouette, color harmony, occasion match — analyzed in seconds.</span>
+            </div>
+          </div>
+          <div class="demo-point">
+            <div class="demo-point-num">03</div>
+            <div class="demo-point-text">
+              <strong>Get Your Verdict</strong>
+              <span>A precise 0–10 score with specific feedback on what's working and what's killing your look.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="fade-up" style="transition-delay:0.15s">
+        <div class="video-frame">
+          <iframe
+            src="https://www.youtube.com/embed/mxuNpAJfsFw"
+            title="DripCheck App Demo"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen>
+          </iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS STEPS -->
   <div class="full-width"><div class="brass-divider"></div></div>
-
-  <!-- ABOUT -->
-  <section id="about">
-    <div class="section-eyebrow fade-up">The Vault</div>
-    <h2 class="section-title fade-up">What Is<br>DripCheck?</h2>
-    <p class="section-sub fade-up">DripCheck is your AI style judge — a mobile app that analyzes your outfit photo and delivers a raw, unfiltered score from 0–10, with detailed feedback on fit, color theory, occasion appropriateness, and the specific pieces dragging you down.</p>
-    <div class="what-grid">
-      <div class="what-card fade-up">
-        <div class="what-icon">👁️</div>
-        <h3>AI Vision Analysis</h3>
-        <p>Our model reads fabric drape, silhouette, color harmony, and occasion fit — not just aesthetics. It sees your outfit the way a trained eye does.</p>
-      </div>
-      <div class="what-card fade-up" style="transition-delay:0.1s">
-        <div class="what-icon">🔥</div>
-        <h3>The Roast Engine</h3>
-        <p>No participation trophies. DripCheck tells you what's working, what's dragging, and why that belt is sabotaging your whole look.</p>
-      </div>
-      <div class="what-card fade-up" style="transition-delay:0.2s">
-        <div class="what-icon">📐</div>
-        <h3>The Score Circle</h3>
-        <p>A precision 0–10 score visualized in brass. Green for bangers. Red for disasters. No ambiguity about where you stand.</p>
-      </div>
-      <div class="what-card fade-up" style="transition-delay:0.3s">
-        <div class="what-icon">🎯</div>
-        <h3>Mood Intelligence</h3>
-        <p>Tag your context — date night, boardroom, grailed pickup — and get feedback tuned to what the situation actually demands.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- SCORE PREVIEW -->
   <section>
-    <div class="section-eyebrow fade-up">Live Example</div>
-    <h2 class="section-title fade-up">The Verdict<br>Looks Like This</h2>
-    <p class="section-sub fade-up">Real feedback. No sugarcoating. Your outfit gets judged the moment it walks in.</p>
-    <div class="score-showcase fade-up">
-      <div>
-        <div class="score-circle"><span class="score-num">7.8</span></div>
-        <div class="score-tags" style="max-width:200px; margin-top:20px;">
-          <span class="score-tag">Fit ✓</span>
-          <span class="score-tag">Color ✓</span>
-          <span class="score-tag red">Shoes ✗</span>
-          <span class="score-tag red">Belt ✗</span>
-        </div>
+    <div class="section-eyebrow fade-up">The Process</div>
+    <h2 class="section-title fade-up">Three Steps.<br>Zero Sugarcoating.</h2>
+    <div class="steps-grid">
+      <div class="step-card fade-up" style="position:relative">
+        <span class="step-num">01</span>
+        <div class="step-icon">📸</div>
+        <h3>Snap Your Fit</h3>
+        <p>Upload a photo of your outfit. The AI reads fabric drape, silhouette, layering, and color from head to toe.</p>
+        <div class="step-arrow">→</div>
       </div>
-      <div class="score-verdict">
-        <span class="verdict-label">AI Verdict — Business Casual</span>
-        <p>"The jacket cuts clean and your trousers sit correctly — that's the foundation. But those chunky sneakers are doing a 360 from every signal the top half is sending. The brown canvas belt is fighting with your black lapels. Swap for a slim Oxford and a black leather belt and this is a genuine 9.2."</p>
-        <div style="margin-top:28px; display:flex; gap:12px; flex-wrap:wrap;">
-          <span class="score-tag" style="color:var(--green); border-color:rgba(76,175,80,0.3); background:rgba(76,175,80,0.06)">Jacket — Banger</span>
-          <span class="score-tag red">Shoes — Red Flag</span>
-        </div>
+      <div class="step-card fade-up" style="transition-delay:0.1s; position:relative">
+        <span class="step-num">02</span>
+        <div class="step-icon">🧠</div>
+        <h3>AI Runs the Analysis</h3>
+        <p>Google Gemini AI breaks down every element — color theory, occasion fit, proportions, and what's dragging the whole look down.</p>
+        <div class="step-arrow">→</div>
+      </div>
+      <div class="step-card fade-up" style="transition-delay:0.2s">
+        <span class="step-num">03</span>
+        <div class="step-icon">🏆</div>
+        <h3>Get the Verdict</h3>
+        <p>A 0–10 score with item-by-item feedback. What stays, what goes, and exactly what to swap to hit a 9+.</p>
       </div>
     </div>
   </section>
+
+  <!-- STYLE TIP OF THE DAY -->
+  <div class="tip-wrap">
+    <div class="tip-inner">
+      <div class="section-eyebrow fade-up" style="text-align:center">Daily Intel</div>
+      <h2 class="section-title fade-up" style="text-align:center; margin-bottom:40px">Style Tip of the Day</h2>
+      <div class="tip-card fade-up">
+        <div class="tip-date-block">
+          <div class="tip-day" id="tipDay">--</div>
+          <div class="tip-month" id="tipMonth">---</div>
+        </div>
+        <div class="tip-divider-v"></div>
+        <div>
+          <div class="tip-label">Today's Rule</div>
+          <div class="tip-title" id="tipTitle">Loading...</div>
+          <div class="tip-text" id="tipText">Loading tip...</div>
+        </div>
+        <div class="tip-score-block">
+          <div class="tip-score-label">Impact Score</div>
+          <div class="tip-score-ring" id="tipRing">
+            <span class="tip-score-num" id="tipScore">9</span>
+          </div>
+          <div class="tip-tag" id="tipTag">Style Rule</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURED FIT -->
+  <div class="featured-wrap" id="featured">
+    <div class="featured-inner">
+      <div class="section-eyebrow fade-up">Community Spotlight</div>
+      <h2 class="section-title fade-up">Today's Featured <span style="background:linear-gradient(135deg,var(--brass),var(--brass-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Fit</span></h2>
+      <p class="section-sub fade-up">Real outfits. Real people. Rated by DripCheck AI. Every day we spotlight a fit from the community — the good, the great, and the ones that need work.</p>
+      <div class="featured-grid">
+        <!-- FEATURED POST CARD -->
+        <div class="featured-post fade-up">
+          <div class="post-img-wrap">
+            <div class="post-placeholder">
+              <div class="post-placeholder-icon">👔</div>
+              <span>Today's Featured Fit</span>
+              <span style="font-size:11px; opacity:0.5">Submit yours on Instagram</span>
+            </div>
+            <div class="post-rated-badge">
+              <img src="logo-full.png" alt="DripCheck">
+              <span>Rated by DripCheck</span>
+            </div>
+            <div class="post-score-badge">
+              <span>8.5</span>
+            </div>
+          </div>
+          <div class="post-body">
+            <div class="post-handle">@featured_user · Today's Pick</div>
+            <p class="post-verdict">"The monochrome palette is doing serious work here. Silhouette is clean, proportions are balanced. The sneakers are the only thing holding this back from a 9."</p>
+            <div class="post-tags">
+              <span class="post-tag green">Silhouette ✓</span>
+              <span class="post-tag green">Color ✓</span>
+              <span class="post-tag green">Fit ✓</span>
+              <span class="post-tag red">Shoes ✗</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- HOW TO GET FEATURED -->
+        <div class="featured-cta-block fade-up" style="transition-delay:0.15s">
+          <div>
+            <div class="section-eyebrow">Get Featured</div>
+            <h3>Want Your Fit<br><span>Rated & Featured?</span></h3>
+          </div>
+          <p>We pick one outfit every day from Instagram, rate it with DripCheck AI, and feature it right here. Your style could be seen by thousands.</p>
+          <div class="ig-steps">
+            <div class="ig-step">
+              <div class="ig-step-icon">📸</div>
+              Post your outfit on Instagram
+            </div>
+            <div class="ig-step">
+              <div class="ig-step-icon">#️⃣</div>
+              Tag it with <strong style="color:var(--brass-light)">&nbsp;#DripCheck</strong>
+            </div>
+            <div class="ig-step">
+              <div class="ig-step-icon">🏷️</div>
+              Mention <strong style="color:var(--brass-light)">&nbsp;@trydripcheck</strong>
+            </div>
+            <div class="ig-step">
+              <div class="ig-step-icon">🔥</div>
+              Get rated and featured daily
+            </div>
+          </div>
+          <div class="ig-handle-input">
+            <span>@</span> trydripcheck — follow us on Instagram
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="full-width"><div class="brass-divider"></div></div>
 
@@ -424,32 +692,32 @@
       <div class="feature-item">
         <span class="feature-num">01</span>
         <h3>Instant Outfit Score</h3>
-        <p>Snap or upload any outfit. Receive a precise 0–10 score with a full breakdown in under 10 seconds.</p>
+        <p>Snap or upload any outfit. Receive a precise 0–10 score with full breakdown in under 10 seconds.</p>
       </div>
       <div class="feature-item">
         <span class="feature-num">02</span>
         <h3>The Roast Mode</h3>
-        <p>Ask for the raw truth. DripCheck will not hold back. Specific pieces get called out by name with no diplomatic filter.</p>
+        <p>No sugarcoating. Specific pieces get called out by name. No diplomatic filter.</p>
       </div>
       <div class="feature-item">
         <span class="feature-num">03</span>
         <h3>Occasion Matching</h3>
-        <p>Business Casual, Date Night, Grail Cop — tag the context and get feedback calibrated to actual real-world standards.</p>
+        <p>Business Casual, Date Night, Streetwear — tag the context and get feedback calibrated to real-world standards.</p>
       </div>
       <div class="feature-item">
         <span class="feature-num">04</span>
         <h3>Fit History Vault</h3>
-        <p>Every scored fit is saved to your personal vault. Track your style evolution and see what's working over time.</p>
+        <p>Every scored fit is saved. Track your style evolution and see exactly what's working over time.</p>
       </div>
       <div class="feature-item">
         <span class="feature-num">05</span>
         <h3>Color Theory Engine</h3>
-        <p>Goes beyond "does it match." Reads harmony, contrast, saturation level, and seasonal palette fit.</p>
+        <p>Goes beyond "does it match." Reads harmony, contrast, saturation, and seasonal palette fit.</p>
       </div>
       <div class="feature-item">
         <span class="feature-num">06</span>
-        <h3>Mood Chips</h3>
-        <p>Frosted-glass tags that surface your outfit's detected mood — Understated, Loud, Professional, Streetwear-coded.</p>
+        <h3>Digital Wardrobe</h3>
+        <p>Build your wardrobe inside the app. Get outfit suggestions generated from pieces you actually own.</p>
       </div>
     </div>
   </section>
@@ -457,43 +725,33 @@
   <!-- MANIFESTO -->
   <div class="manifesto-wrap">
     <div class="manifesto-inner">
-      <div class="section-eyebrow fade-up">The Philosophy</div>
+      <div class="section-eyebrow fade-up" style="text-align:center">The Philosophy</div>
       <p class="manifesto-quote fade-up">"Style is not <em>subjective</em>. There are principles. There are rules. There are people who know them and people who don't.<br><br>DripCheck is <em>the one that knows</em>."</p>
       <div class="manifesto-pills fade-up">
-        <span class="pill">Exclusive</span>
-        <span class="pill">Honest</span>
-        <span class="pill">Sophisticated</span>
-        <span class="pill">Uncompromising</span>
+        <span class="pill">Exclusive</span><span class="pill">Honest</span>
+        <span class="pill">Sophisticated</span><span class="pill">Uncompromising</span>
         <span class="pill">Masculine</span>
       </div>
     </div>
   </div>
 
-  <!-- DOWNLOAD -->
-  <section id="download" style="text-align:center;">
-    <div class="section-eyebrow fade-up" style="text-align:center">The Gates</div>
-    <h2 class="section-title fade-up" style="text-align:center">Step Inside<br>The Vault</h2>
-    <p class="section-sub fade-up" style="margin:0 auto; text-align:center;">Available on iOS and Android. Free to download. No excuses for a bad fit anymore.</p>
-    <div class="download-cards">
-      <a href="#" class="app-card fade-up">
-        <div class="app-icon"><img src="logo-full.png" alt="" style="width:36px;height:36px;object-fit:contain;"></div>
-        <span class="app-platform">Download on the</span>
-        <span class="app-name">App Store</span>
-        <span class="app-badge">iOS — Free</span>
-      </a>
-      <a href="#" class="app-card fade-up" style="transition-delay:0.1s;">
-        <div class="app-icon"><img src="logo-full.png" alt="" style="width:36px;height:36px;object-fit:contain;"></div>
-        <span class="app-platform">Get it on</span>
-        <span class="app-name">Google Play</span>
-        <span class="app-badge">Android — Free</span>
-      </a>
+  <!-- EARLY ACCESS CTA -->
+  <div class="cta-section">
+    <div class="cta-inner fade-up">
+      <div class="section-eyebrow" style="text-align:center">Limited Waitlist</div>
+      <h2 class="cta-title">Be First<br><span>In The Vault</span></h2>
+      <p class="cta-sub">DripCheck is launching soon on iOS and Android. Drop your email to get early access before everyone else.</p>
+      <a href="https://tally.so/r/obGYrO" target="_blank" class="btn-gold" style="display:inline-flex; margin:0 auto 16px;">Join the Waitlist →</a>
+      <p class="cta-note">No spam. Unsubscribe anytime. iOS & Android.</p>
     </div>
-  </section>
+  </div>
 
   <!-- FOOTER -->
   <div class="full-width"><div class="brass-divider"></div></div>
   <footer>
-    <span class="footer-logo" style="display:flex;align-items:center;gap:10px;"><img src="logo-full.png" alt="DripCheck" style="height:32px;width:32px;object-fit:contain;">DripCheck</span>
+    <div class="footer-logo">
+      <img src="logo-full.png" alt="DripCheck">DripCheck
+    </div>
     <span class="footer-copy">© 2025 DripCheck. All rights reserved.</span>
     <ul class="footer-links">
       <li><a href="privacy.html">Privacy</a></li>
@@ -503,47 +761,75 @@
   </footer>
 
   <script>
-    // Init Vanta.js HALO effect — free, open source, zero watermark
+    // ── VANTA HERO ──
     VANTA.HALO({
-      el: '#vanta-hero',
-      mouseControls: true,
-      touchControls: true,
-      gyroControls: false,
-      minHeight: 200.0,
-      minWidth: 200.0,
-      baseColor: 0x0a0805,
-      backgroundColor: 0x050403,
-      amplitudeFactor: 2.0,
-      xOffset: 0.0,
-      yOffset: -0.1,
-      size: 1.8
+      el: '#vanta-hero', mouseControls: true, touchControls: true, gyroControls: false,
+      minHeight: 200, minWidth: 200, baseColor: 0x0a0805, backgroundColor: 0x050403,
+      amplitudeFactor: 2.0, xOffset: 0, yOffset: -0.1, size: 1.8
     });
 
-    // Scroll fade-up
+    // ── NAV SCROLL ──
+    var nav = document.getElementById('mainNav');
+    window.addEventListener('scroll', function() {
+      nav.classList.toggle('scrolled', window.scrollY > 60);
+    });
+
+    // ── FADE UP OBSERVER ──
     var observer = new IntersectionObserver(function(entries) {
-      entries.forEach(function(entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          observer.unobserve(entry.target);
-        }
+      entries.forEach(function(e) {
+        if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
       });
-    }, { threshold: 0.12 });
+    }, { threshold: 0.1 });
     document.querySelectorAll('.fade-up').forEach(function(el) { observer.observe(el); });
 
-    // Nav scroll effect
-    var nav = document.querySelector('nav');
-    window.addEventListener('scroll', function() {
-      if (window.scrollY > 60) {
-        nav.style.background = 'rgba(5,4,3,0.97)';
-        nav.style.backdropFilter = 'blur(12px)';
-        nav.style.borderBottom = '1px solid rgba(184,134,11,0.15)';
-      } else {
-        nav.style.background = 'linear-gradient(to bottom, rgba(5,4,3,0.95), transparent)';
-        nav.style.backdropFilter = 'blur(2px)';
-        nav.style.borderBottom = 'none';
-      }
+    // ── MODAL ──
+    function openModal() {
+      document.getElementById('earlyModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+      document.getElementById('earlyModal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    document.getElementById('earlyModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
     });
+    // Forms handled by Tally.so
+
+    // ── STYLE TIP OF THE DAY ──
+    var tips = [
+      { title: "Fit Over Everything", text: "A perfectly fitting plain white tee beats an ill-fitting designer piece every time. Fit is the foundation — nothing else works if this is wrong.", score: 9.5, tag: "Foundation Rule" },
+      { title: "Monochrome is a Cheat Code", text: "Wearing one color head to toe instantly creates a sharp, intentional silhouette. It's the easiest way to look put together without trying hard.", score: 8.8, tag: "Color Strategy" },
+      { title: "One Statement Piece Max", text: "If your shoes are loud, keep everything else quiet. If your jacket is the main character, let it be. Competing statement pieces cancel each other out.", score: 9.2, tag: "Balance Rule" },
+      { title: "Tuck In or Don't — Commit", text: "Half-tucking looks intentional on a runway, accidental in real life. Full tuck or fully untucked. Make a decision and own it.", score: 8.5, tag: "Styling Rule" },
+      { title: "Shoes Make or Break It", text: "You can wear the cleanest outfit in the room and one wrong shoe choice destroys it. Shoes are the signature. Get them right.", score: 9.7, tag: "Critical Detail" },
+      { title: "Proportion is Everything", text: "Wide top, slim bottom. Slim top, wide bottom. Mixing proportions creates tension. Matching proportions creates flow. Know which game you're playing.", score: 9.0, tag: "Silhouette Rule" },
+      { title: "Earn Your Accessories", text: "A watch, a ring, a chain — pick one hero accessory and let it breathe. Stacking without intention reads as noise, not style.", score: 8.3, tag: "Restraint Rule" },
+      { title: "Neutral Base, Bold Detail", text: "Build your outfit on a neutral foundation — navy, grey, black, white. Then add one deliberate pop of color or texture. This formula is nearly impossible to get wrong.", score: 9.1, tag: "Color Formula" },
+      { title: "Grooming is Part of the Outfit", text: "No AI can score this yet, but a 9/10 outfit with unkempt hair or skin reads as a 7. The outfit is the frame. You are the painting.", score: 9.4, tag: "The Full Picture" },
+      { title: "Dress for Where You're Going", text: "Context is everything. The most stylish person in the room is dressed exactly right for that room — not overdressed, not underdressed. Read the room.", score: 8.9, tag: "Occasion Rule" },
+      { title: "White Sneakers Are Never Wrong", text: "Clean white sneakers with almost any casual or smart-casual outfit is a solved problem. Keep them clean. This is non-negotiable.", score: 8.6, tag: "Safe Play" },
+      { title: "Dark Outfits, Light Shoes — Carefully", text: "Wearing dark clothes with light shoes draws the eye downward. This can work beautifully or look accidental. Make it look intentional.", score: 8.4, tag: "Contrast Rule" }
+    ];
+
+    var now = new Date();
+    var dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
+    var tip = tips[dayOfYear % tips.length];
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    document.getElementById('tipDay').textContent = now.getDate();
+    document.getElementById('tipMonth').textContent = months[now.getMonth()];
+    document.getElementById('tipTitle').textContent = tip.title;
+    document.getElementById('tipText').textContent = tip.text;
+    document.getElementById('tipScore').textContent = tip.score;
+    document.getElementById('tipTag').textContent = tip.tag;
+    var deg = (tip.score / 10) * 360;
+    document.getElementById('tipRing').style.setProperty('--tip-deg', deg + 'deg');
+    document.getElementById('tipRing').style.background =
+      'conic-gradient(var(--brass-light) 0deg, var(--brass) ' + deg + 'deg, rgba(184,134,11,0.15) ' + deg + 'deg)';
   </script>
+</body>
+</html>
 
 </body>
 </html>
