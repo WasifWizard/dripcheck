@@ -437,20 +437,18 @@
 </head>
 <body>
 
-  <!-- EARLY ACCESS MODAL -->
+  <!-- ANDROID WAITLIST MODAL -->
   <div class="modal-overlay" id="earlyModal">
-    <div class="modal" style="padding:0; overflow:hidden; max-width:560px; border-radius:20px;">
-      <button class="modal-close" onclick="closeModal()" style="position:absolute;top:16px;right:16px;z-index:10;">✕</button>
-      <iframe
-        src="https://tally.so/r/obGYrO"
-        width="100%"
-        height="520"
-        frameborder="0"
-        marginheight="0"
-        marginwidth="0"
-        title="DripCheck Early Access"
-        style="display:block; border-radius:20px; background:transparent;"
-      ></iframe>
+    <div class="modal" style="padding:0;overflow:hidden;max-width:560px;border-radius:20px;position:relative;">
+      <button onclick="closeModal()" style="position:absolute;top:14px;right:14px;z-index:10;background:rgba(5,4,3,0.85);border:1px solid rgba(184,134,11,0.3);color:rgba(255,255,255,0.7);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;line-height:1;">✕</button>
+      <div style="background:var(--card-bg);padding:24px 28px 14px;border-bottom:1px solid var(--brass-border);display:flex;align-items:center;gap:14px;">
+        <img src="logo-full.png" style="width:34px;height:34px;object-fit:contain;">
+        <div>
+          <div style="font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--brass);margin-bottom:3px;">Android · Coming Soon</div>
+          <div style="font-family:Barlow Condensed,sans-serif;font-size:18px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:var(--text-bright);">Get Notified at Launch</div>
+        </div>
+      </div>
+      <iframe src="https://tally.so/r/obGYrO" width="100%" height="460" frameborder="0" marginheight="0" marginwidth="0" title="DripCheck Android Waitlist" style="display:block;background:var(--card-bg);"></iframe>
     </div>
   </div>
 
@@ -465,7 +463,7 @@
       <li><a href="#features">Features</a></li>
       <li><a href="contact.html">Contact</a></li>
     </ul>
-    <button class="nav-cta" onclick="openModal()">Get Early Access</button>
+    <a href="https://apps.apple.com/app/id6760911744" target="_blank" class="nav-cta" style="text-decoration:none;">⬇ Download for iOS</a>
   </nav>
 
   <!-- HERO -->
@@ -473,16 +471,22 @@
     <div id="vanta-hero"></div>
     <div class="hero-overlay"></div>
     <div class="hero-content fade-up">
-      <div class="hero-eyebrow"><span class="eyebrow-dot"></span>Now Accepting Waitlist</div>
+      <div class="hero-eyebrow"><span class="eyebrow-dot"></span>Now Live on the App Store</div>
       <h1 class="hero-title">
-        <span class="gold">Every Outfit</span><br>
-        <span class="white">Rated. Ruthlessly.</span>
+        <span class="gold">Your Mirror</span><br>
+        <span class="white">Is Lying.</span>
       </h1>
-      <p class="hero-sub">Not everyone gets in. Neither does every fit.</p>
+      <p class="hero-sub">The AI that tells you what your friends won't.</p>
       <p class="hero-desc">DripCheck is the AI style judge that rates your outfit with brutal honesty — scoring fit, color theory, occasion match, and every piece dragging you down.</p>
       <div class="hero-actions">
-        <button class="btn-gold" onclick="openModal()">Join the Waitlist →</button>
-        <a href="#how-it-works" class="btn-outline">See How It Works</a>
+        <a href="https://apps.apple.com/app/id6760911744" target="_blank" class="btn-gold" style="gap:10px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          Download for iOS
+        </a>
+        <button class="btn-outline" onclick="openModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 15.341 14.58 12l2.943-3.341A1 1 0 0 0 16.77 7.2l-3.24 3.68L10.29 7.2a1 1 0 0 0-1.754.799l.001.061 2.943 3.341-2.943 3.34a1 1 0 0 0 1.507 1.314l.001-.001 3.24-3.68 3.24 3.68a1 1 0 0 0 1.507-1.313l.001.001zM12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z"/></svg>
+          Android — Notify Me
+        </button>
       </div>
     </div>
     <div class="hero-scroll"><div class="scroll-line"></div>Scroll</div>
@@ -492,8 +496,8 @@
   <div class="full-width">
     <div class="proof-bar fade-up">
       <div class="proof-item">
-        <span class="proof-num">500+</span>
-        <span class="proof-label">Waitlist Members</span>
+        <span class="proof-num">Live</span>
+        <span class="proof-label">On App Store</span>
       </div>
       <div class="proof-sep"></div>
       <div class="proof-item">
@@ -739,14 +743,23 @@
     </div>
   </div>
 
-  <!-- EARLY ACCESS CTA -->
+  <!-- DOWNLOAD CTA -->
   <div class="cta-section">
     <div class="cta-inner fade-up">
-      <div class="section-eyebrow" style="text-align:center">Limited Waitlist</div>
-      <h2 class="cta-title">Be First<br><span>In The Vault</span></h2>
-      <p class="cta-sub">DripCheck is launching soon on iOS and Android. Drop your email to get early access before everyone else.</p>
-      <a href="https://tally.so/r/obGYrO" target="_blank" class="btn-gold" style="display:inline-flex; margin:0 auto 16px;">Join the Waitlist →</a>
-      <p class="cta-note">No spam. Unsubscribe anytime. iOS & Android.</p>
+      <div class="section-eyebrow" style="text-align:center">Available Now</div>
+      <h2 class="cta-title">Download<br><span>DripCheck</span></h2>
+      <p class="cta-sub">Live on iOS. Android coming very soon — join the waitlist to be first in line.</p>
+      <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:16px;">
+        <a href="https://apps.apple.com/app/id6760911744" target="_blank" class="btn-gold" style="gap:10px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          Download for iOS
+        </a>
+        <button class="btn-outline" onclick="openModal()" style="gap:10px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 15.341 14.58 12l2.943-3.341A1 1 0 0 0 16.77 7.2l-3.24 3.68L10.29 7.2a1 1 0 0 0-1.754.799l.001.061 2.943 3.341-2.943 3.34a1 1 0 0 0 1.507 1.314l.001-.001 3.24-3.68 3.24 3.68a1 1 0 0 0 1.507-1.313l.001.001zM12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z"/></svg>
+          Android — Notify Me
+        </button>
+      </div>
+      <p class="cta-note">iOS available now · Android coming soon</p>
     </div>
   </div>
 
@@ -756,7 +769,7 @@
     <div class="footer-logo">
       <img src="logo-full.png" alt="DripCheck">DripCheck
     </div>
-    <span class="footer-copy">© 2026 DripCheck. All rights reserved.</span>
+    <span class="footer-copy">© 2025 DripCheck. All rights reserved.</span>
     <ul class="footer-links">
       <li><a href="privacy.html">Privacy</a></li>
       <li><a href="terms.html">Terms</a></li>
